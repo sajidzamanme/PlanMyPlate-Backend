@@ -30,7 +30,7 @@ public class AuthService {
         userRepository.save(user);
         
         String token = jwtUtil.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), user.getName());
+        return new AuthResponse(token, user.getEmail(), user.getName(), user.getUserId());
     }
     
     public AuthResponse signIn(SignInRequest request) {
@@ -42,7 +42,7 @@ public class AuthService {
         }
         
         String token = jwtUtil.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), user.getName());
+        return new AuthResponse(token, user.getEmail(), user.getName(), user.getUserId());
     }
     
     public MessageResponse forgotPassword(ForgotPasswordRequest request) {

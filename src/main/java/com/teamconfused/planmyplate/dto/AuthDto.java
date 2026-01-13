@@ -41,11 +41,13 @@ public class AuthDto {
         private String token;
         private String email;
         private String name;
+        private Integer userId;
         
-        public AuthResponse(String token, String email, String name) {
+        public AuthResponse(String token, String email, String name, Integer userId) {
             this.token = token;
             this.email = email;
             this.name = name;
+            this.userId = userId;
         }
     }
     
