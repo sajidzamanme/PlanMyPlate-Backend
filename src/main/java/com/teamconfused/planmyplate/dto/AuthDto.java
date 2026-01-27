@@ -37,6 +37,15 @@ public class AuthDto {
     }
     
     @Data
+    public static class ResetPasswordRequest {
+        @NotBlank
+        private String resetToken;
+        
+        @NotBlank
+        private String newPassword;
+    }
+    
+    @Data
     public static class AuthResponse {
         private String token;
         private String email;

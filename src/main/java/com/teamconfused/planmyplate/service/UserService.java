@@ -18,4 +18,39 @@ public class UserService {
         
         return new UserDto(user.getUserId(), user.getEmail(), user.getName(), user.getUserName());
     }
+    
+    public User getUserById(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+    
+    public User updateUser(Integer userId, User userUpdate) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        if (userUpdate.getName() != null) {
+            user.setName(userUpdate.getName());
+        }
+        if (userUpdate.getUserName() != null) {
+            user.setUserName(userUpdate.getUserName());
+        }
+        if (userUpdate.getAge() != null) {
+            user.setAge(userUpdate.getAge());
+        }
+        if (userUpdate.getWeight() != null) {
+            user.setWeight(userUpdate.getWeight());
+        }
+        if (userUpdate.getBudget() != null) {
+            user.setBudget(userUpdate.getBudget());
+        }
+        
+        return userRepository.save(user);
+    }
+    
+    public void deleteUser(Integer userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found");
+        }
+        userRepository.deleteById(userId);
+    }
 }

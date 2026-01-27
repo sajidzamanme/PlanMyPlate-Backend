@@ -4,6 +4,7 @@ import com.teamconfused.planmyplate.entity.*;
 import com.teamconfused.planmyplate.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -25,10 +26,22 @@ public class IngredientService {
     
     public Ingredient update(Integer id, Ingredient ingredient) {
         if (!repository.existsById(id)) throw new RuntimeException("Ingredient not found");
-        return repository.save(ingredient);
+        Ingredient existing = repository.findById(id).get();
+        if (ingredient.getName() != null) existing.setName(ingredient.getName());
+        if (ingredient.getPrice() != null) existing.setPrice(ingredient.getPrice());
+        return repository.save(existing);
     }
     
     public void delete(Integer id) {
+        if (!repository.existsById(id)) throw new RuntimeException("Ingredient not found");
         repository.deleteById(id);
+    }
+    
+    public List<Ingredient> searchByName(String name) {
+        return repository.findByNameContainingIgnoreCase(name);
+    }
+    
+    public List<Ingredient> filterByPrice(Double minPrice, Double maxPrice) {
+        return repository.findByPriceBetween(BigDecimal.valueOf(minPrice), BigDecimal.valueOf(maxPrice));
     }
 }

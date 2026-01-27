@@ -3,18 +3,19 @@ package com.teamconfused.planmyplate.dto;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 public class EntityDto {
-    
+
     @Data
     public static class IngredientDto {
         private Integer ingId;
         private String name;
         private BigDecimal price;
-        private String prefTags;
+        private List<String> prefTags;
     }
-    
+
     @Data
     public static class RecipeDto {
         private Integer recipeId;
@@ -23,14 +24,14 @@ public class EntityDto {
         private Integer calories;
         private Set<Integer> ingredientIds;
     }
-    
+
     @Data
     public static class InventoryDto {
         private Integer invId;
         private LocalDate lastUpdate;
         private Integer userId;
     }
-    
+
     @Data
     public static class InvItemDto {
         private Integer itemId;
@@ -40,7 +41,7 @@ public class EntityDto {
         private Integer invId;
         private Integer ingId;
     }
-    
+
     @Data
     public static class MealPlanDto {
         private Integer mpId;
@@ -50,7 +51,7 @@ public class EntityDto {
         private Integer userId;
         private Set<Integer> recipeIds;
     }
-    
+
     @Data
     public static class GroceryListDto {
         private Integer listId;

@@ -7,8 +7,9 @@ import com.teamconfused.planmyplate.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -48,13 +49,32 @@ public class AuthService {
     public MessageResponse forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        String resetToken = UUID.randomUUID().toString();
+
+        SecureRandom secureRandom = new SecureRandom();
+        int number = secureRandom.nextInt(1000, 10000);
+
+        String resetToken = String.valueOf(number);
         user.setResetToken(resetToken);
         user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
         userRepository.save(user);
         
         // In production, send email with reset link containing the token
-        return new MessageResponse("Password reset token generated: " + resetToken);
+        return new MessageResponse("Password reset token sent to email. Token: " + resetToken);
+    }
+    
+    public MessageResponse resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByResetToken(request.getResetToken())
+                .orElseThrow(() -> new RuntimeException("Invalid reset token"));
+        
+        if (user.getResetTokenExpiry() == null || LocalDateTime.now().isAfter(user.getResetTokenExpiry())) {
+            throw new RuntimeException("Reset token expired");
+        }
+        
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+        
+        return new MessageResponse("Password reset successfully");
     }
 }

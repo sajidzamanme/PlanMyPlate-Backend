@@ -25,10 +25,25 @@ public class RecipeService {
     
     public Recipe update(Integer id, Recipe recipe) {
         if (!repository.existsById(id)) throw new RuntimeException("Recipe not found");
-        return repository.save(recipe);
+        Recipe existing = repository.findById(id).get();
+        if (recipe.getName() != null) existing.setName(recipe.getName());
+        if (recipe.getDescription() != null) existing.setDescription(recipe.getDescription());
+        if (recipe.getCalories() != null) existing.setCalories(recipe.getCalories());
+        if (recipe.getIngredients() != null) existing.setIngredients(recipe.getIngredients());
+        return repository.save(existing);
     }
     
     public void delete(Integer id) {
+        if (!repository.existsById(id)) throw new RuntimeException("Recipe not found");
         repository.deleteById(id);
     }
+    
+    public List<Recipe> searchByName(String name) {
+        return repository.findByNameContainingIgnoreCase(name);
+    }
+    
+    public List<Recipe> filterByCalories(Integer minCalories, Integer maxCalories) {
+        return repository.findByCaloriesBetween(minCalories, maxCalories);
+    }
 }
+
