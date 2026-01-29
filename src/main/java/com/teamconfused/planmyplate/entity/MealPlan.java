@@ -10,8 +10,8 @@ import java.util.Set;
 @Entity
 @Table(name = "meal_plan")
 @Data
-@EqualsAndHashCode(exclude = "recipes")
-@ToString(exclude = "recipes")
+@EqualsAndHashCode(exclude = "slots")
+@ToString(exclude = "slots")
 public class MealPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,6 @@ public class MealPlan {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany
-    @JoinTable(name = "meal_plan_recipe", joinColumns = @JoinColumn(name = "mp_id"), inverseJoinColumns = @JoinColumn(name = "recipe_id"))
-    private Set<Recipe> recipes;
+    @OneToMany(mappedBy = "mealPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<MealSlot> slots;
 }

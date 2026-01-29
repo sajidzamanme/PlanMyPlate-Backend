@@ -52,4 +52,13 @@ public class GroceryListController {
         service.purchaseItems(id, dto.getIngredientIds());
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{listId}/items/{itemId}")
+    public ResponseEntity<com.teamconfused.planmyplate.entity.GroceryListItem> updateItem(
+            @PathVariable Integer listId, // Not strictly needed if itemId is unique, but good for validation if we
+                                          // wanted to check ownership
+            @PathVariable Integer itemId,
+            @RequestBody com.teamconfused.planmyplate.dto.UpdateItemRequestDto request) {
+        return ResponseEntity.ok(service.updateItem(itemId, request));
+    }
 }

@@ -5,13 +5,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import java.time.LocalDate;
-import java.util.Set;
 
 @Entity
 @Table(name = "grocery_list")
 @Data
-@EqualsAndHashCode(exclude = "ingredients")
-@ToString(exclude = "ingredients")
+@EqualsAndHashCode(exclude = "items")
+@ToString(exclude = "items")
 public class GroceryList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +26,6 @@ public class GroceryList {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany
-    @JoinTable(name = "grocery_list_ingredients", joinColumns = @JoinColumn(name = "list_id"), inverseJoinColumns = @JoinColumn(name = "ing_id"))
-    private Set<Ingredient> ingredients;
+    @OneToMany(mappedBy = "groceryList", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<GroceryListItem> items;
 }

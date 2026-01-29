@@ -109,4 +109,28 @@ public class InventoryService {
 
         return invItemRepository.save(newItem);
     }
+
+    public InvItem updateItem(Integer itemId, com.teamconfused.planmyplate.dto.UpdateItemRequestDto request) {
+        InvItem item = invItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        if (request.getQuantity() != null) {
+            item.setQuantity(request.getQuantity());
+            if (request.getQuantity() <= 0) {
+                // Logic for 0 quantity: remove item
+                invItemRepository.delete(item);
+                return null; // Or return a "deleted" status wrapper
+            }
+        }
+        if (request.getExpiryDate() != null) {
+            item.setExpiryDate(request.getExpiryDate());
+        }
+
+        // Update parent inventory last update time
+        Inventory inventory = item.getInventory();
+        inventory.setLastUpdate(LocalDate.now());
+        repository.save(inventory);
+
+        return invItemRepository.save(item);
+    }
 }

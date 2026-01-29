@@ -44,8 +44,8 @@ public class MealPlanService {
             existing.setStatus(mealPlan.getStatus());
         if (mealPlan.getDuration() != null)
             existing.setDuration(mealPlan.getDuration());
-        if (mealPlan.getRecipes() != null)
-            existing.setRecipes(mealPlan.getRecipes());
+        // if (mealPlan.getRecipes() != null)
+        // existing.setRecipes(mealPlan.getRecipes());
         return repository.save(existing);
     }
 
@@ -76,15 +76,51 @@ public class MealPlanService {
         mealPlan.setDuration(dto.getDuration() != null ? dto.getDuration() : 7); // Default 7 days
         mealPlan.setStatus("active");
 
-        if (dto.getRecipeIds() != null && !dto.getRecipeIds().isEmpty()) {
-            List<com.teamconfused.planmyplate.entity.Recipe> recipes = recipeRepository.findAllById(dto.getRecipeIds());
-            mealPlan.setRecipes(new java.util.HashSet<>(recipes));
+        List<com.teamconfused.planmyplate.entity.MealSlot> slots = new java.util.ArrayList<>();
+        mealPlan.setSlots(slots);
 
-            // Collect ingredients
+        if (dto.getRecipeIds() != null && !dto.getRecipeIds().isEmpty()) {
+            List<Integer> recipeIds = dto.getRecipeIds();
+            // We expect 21 recipes. If less, we might cycle or just stop. If more, we use
+            // the first 21?
+            // User requirement: "breakfast, lunch, dinner, breakfast..." sequence.
+
+            // Loop for 21 slots (7 days * 3 meals)
+            for (int i = 0; i < 21; i++) {
+                if (i >= recipeIds.size())
+                    break; // Prevent index out of bounds if less than 21 provided
+
+                Integer recipeId = recipeIds.get(i);
+                com.teamconfused.planmyplate.entity.Recipe recipe = recipeRepository.findById(recipeId)
+                        .orElseThrow(() -> new RuntimeException("Recipe not found: " + recipeId));
+
+                com.teamconfused.planmyplate.entity.MealSlot slot = new com.teamconfused.planmyplate.entity.MealSlot();
+                slot.setMealPlan(mealPlan);
+                slot.setRecipe(recipe);
+                slot.setSlotIndex(i);
+
+                // Calculate day (1-7) and meal type
+                int day = (i / 3) + 1;
+                int typeIndex = i % 3;
+                String type = typeIndex == 0 ? "Breakfast" : (typeIndex == 1 ? "Lunch" : "Dinner");
+
+                slot.setDayNumber(day);
+                slot.setMealType(type);
+
+                slots.add(slot);
+            }
+
+            // Collect ingredients for grocery list (unique recipes only)
             java.util.Set<com.teamconfused.planmyplate.entity.Ingredient> ingredients = new java.util.HashSet<>();
-            for (com.teamconfused.planmyplate.entity.Recipe recipe : recipes) {
-                if (recipe.getIngredients() != null) {
-                    ingredients.addAll(recipe.getIngredients());
+            java.util.Set<Integer> uniqueRecipeIds = new java.util.HashSet<>(recipeIds);
+            List<com.teamconfused.planmyplate.entity.Recipe> uniqueRecipes = recipeRepository
+                    .findAllById(uniqueRecipeIds);
+
+            for (com.teamconfused.planmyplate.entity.Recipe recipe : uniqueRecipes) {
+                if (recipe.getRecipeIngredients() != null) {
+                    for (com.teamconfused.planmyplate.entity.RecipeIngredient ri : recipe.getRecipeIngredients()) {
+                        ingredients.add(ri.getIngredient());
+                    }
                 }
             }
 

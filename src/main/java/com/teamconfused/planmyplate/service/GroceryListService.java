@@ -41,8 +41,8 @@ public class GroceryListService {
         if (groceryList.getStatus() != null) {
             existing.setStatus(groceryList.getStatus());
         }
-        if (groceryList.getIngredients() != null) {
-            existing.setIngredients(groceryList.getIngredients());
+        if (groceryList.getItems() != null) {
+            existing.setItems(groceryList.getItems());
         }
         return repository.save(existing);
     }
@@ -72,18 +72,52 @@ public class GroceryListService {
                     newList.setUser(user);
                     newList.setDateCreated(LocalDate.now());
                     newList.setStatus("active");
-                    newList.setIngredients(new java.util.HashSet<>());
+                    newList.setItems(new java.util.ArrayList<>());
                     return repository.save(newList);
                 });
 
-        // Initialize if null (though orElseGet handles it, existing records might have
-        // null)
-        if (activeList.getIngredients() == null) {
-            activeList.setIngredients(new java.util.HashSet<>());
+        if (activeList.getItems() == null) {
+            activeList.setItems(new java.util.ArrayList<>());
         }
 
-        activeList.getIngredients().addAll(ingredients);
+        for (com.teamconfused.planmyplate.entity.Ingredient ingredient : ingredients) {
+            // Check if ingredient already exists in list
+            boolean exists = activeList.getItems().stream()
+                    .anyMatch(item -> item.getIngredient().getIngId().equals(ingredient.getIngId()));
+
+            if (!exists) {
+                com.teamconfused.planmyplate.entity.GroceryListItem newItem = new com.teamconfused.planmyplate.entity.GroceryListItem();
+                newItem.setGroceryList(activeList);
+                newItem.setIngredient(ingredient);
+                newItem.setQuantity(1); // Default quantity
+                newItem.setUnit("unit"); // Default unit
+                activeList.getItems().add(newItem);
+            }
+        }
+
         repository.save(activeList);
+    }
+
+    private final com.teamconfused.planmyplate.repository.GroceryListItemRepository itemRepository;
+
+    public com.teamconfused.planmyplate.entity.GroceryListItem updateItem(Integer itemId,
+            com.teamconfused.planmyplate.dto.UpdateItemRequestDto request) {
+        com.teamconfused.planmyplate.entity.GroceryListItem item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        if (request.getQuantity() != null) {
+            if (request.getQuantity() <= 0) {
+                // Remove logic could go here, or throw error depending on requirements
+                // For now, let's keep it but maybe handle removal via DELETE endpoint
+                // explicitly
+            }
+            item.setQuantity(request.getQuantity());
+        }
+        if (request.getUnit() != null) {
+            item.setUnit(request.getUnit());
+        }
+
+        return itemRepository.save(item);
     }
 
     private final InventoryService inventoryService;
@@ -97,13 +131,12 @@ public class GroceryListService {
             return;
 
         // Use an iterator to safely remove while iterating
-        java.util.Iterator<com.teamconfused.planmyplate.entity.Ingredient> iterator = list.getIngredients().iterator();
+        java.util.Iterator<com.teamconfused.planmyplate.entity.GroceryListItem> iterator = list.getItems().iterator();
         while (iterator.hasNext()) {
-            com.teamconfused.planmyplate.entity.Ingredient ingredient = iterator.next();
-            if (ingredientIds.contains(ingredient.getIngId())) {
-                // Add to inventory (default quantity 1 for now as recipes don't strictly define
-                // quantity yet)
-                inventoryService.addToInventory(list.getUser().getUserId(), ingredient, 1);
+            com.teamconfused.planmyplate.entity.GroceryListItem item = iterator.next();
+            if (ingredientIds.contains(item.getIngredient().getIngId())) {
+                // Add to inventory with specific quantity
+                inventoryService.addToInventory(list.getUser().getUserId(), item.getIngredient(), item.getQuantity());
                 // Remove from grocery list
                 iterator.remove();
             }

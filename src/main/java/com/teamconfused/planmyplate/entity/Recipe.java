@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "recipe")
 @Data
-@EqualsAndHashCode(exclude = "ingredients")
-@ToString(exclude = "ingredients")
+@EqualsAndHashCode(exclude = "recipeIngredients")
+@ToString(exclude = "recipeIngredients")
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,17 @@ public class Recipe {
 
     private Integer calories;
 
-    @ManyToMany
-    @JoinTable(name = "recipe_ingredients", joinColumns = @JoinColumn(name = "recipe_id"), inverseJoinColumns = @JoinColumn(name = "ing_id"))
-    private Set<Ingredient> ingredients;
+    @Column(name = "prep_time")
+    private Integer prepTime;
+
+    @Column(name = "cook_time")
+    private Integer cookTime;
+
+    private Integer servings;
+
+    @Column(columnDefinition = "TEXT")
+    private String instructions;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecipeIngredient> recipeIngredients;
 }
