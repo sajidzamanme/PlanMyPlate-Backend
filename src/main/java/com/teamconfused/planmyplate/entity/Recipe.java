@@ -35,6 +35,9 @@ public class Recipe {
     @Column(columnDefinition = "TEXT")
     private String instructions;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeIngredient> recipeIngredients;
 }

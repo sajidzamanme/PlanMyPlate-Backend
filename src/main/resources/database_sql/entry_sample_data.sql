@@ -2,24 +2,6 @@
 -- Run this AFTER the schema is created but BEFORE creating users/meal plans if you want a clean slate for static data.
 -- Or run it to populate a fresh database.
 
--- Clear existing static data (optional, be careful with FKs)
-SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE recipe_ingredients;
-TRUNCATE TABLE ingredient_tag_map;
-TRUNCATE TABLE user_preferences_allergies;
-TRUNCATE TABLE user_preferences_dislikes;
-TRUNCATE TABLE user_allergies;
-TRUNCATE TABLE user_dislikes;
-TRUNCATE TABLE inv_item;
-TRUNCATE TABLE grocery_list_ingredients;
-TRUNCATE TABLE meal_slot; -- New table
-TRUNCATE TABLE allergies;
-TRUNCATE TABLE diets;
-TRUNCATE TABLE ingredients;
-TRUNCATE TABLE ingredient_tags;
-TRUNCATE TABLE recipe;
-SET FOREIGN_KEY_CHECKS = 1;
-
 -- 1. Allergies
 INSERT INTO `allergies` (`allergy_name`) VALUES
 ('Peanuts'), ('Milk'), ('Eggs'), ('Shellfish'), ('Soy'), ('Gluten'), ('Tree Nuts');
@@ -70,19 +52,19 @@ INSERT INTO `ingredient_tag_map` (`ing_id`, `tag_id`) VALUES
 
 
 -- 6. Recipes
-INSERT INTO `recipe` (`name`, `description`, `calories`) VALUES
-('Grilled Chicken Bowl', 'Chicken with rice and vegetables', 550),
-('Veggie Stir Fry', 'Mixed vegetables with tofu', 420),
-('Salmon Salad', 'Fresh salmon with greens', 480),
-('Egg Omelette', 'Egg omelette with olive oil', 350),
-('Vegan Buddha Bowl', 'Rice, tofu, veggies', 500),
-('Keto Chicken Plate', 'Low-carb chicken meal', 600),
-('Peanut Tofu Curry', 'Spicy curry with tofu', 530),
-('Steak and Eggs', 'Classic high protein breakfast', 700),
-('Pasta Primavera', 'Pasta with fresh vegetables', 450),
-('BLT Sandwich', 'Bacon, lettuce, tomato on bread', 500),
-('Avocado Toast', 'Toast topped with avocado and egg', 400),
-('Spinach Salad', 'Fresh spinach with cheese and nuts', 300);
+INSERT INTO `recipe` (`name`, `description`, `calories`, `image_url`) VALUES
+('Grilled Chicken Bowl', 'Chicken with rice and vegetables', 550, 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'),
+('Veggie Stir Fry', 'Mixed vegetables with tofu', 420, 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd'),
+('Salmon Salad', 'Fresh salmon with greens', 480, 'https://images.unsplash.com/photo-1467003909585-2f8a72700288'),
+('Egg Omelette', 'Egg omelette with olive oil', 350, 'https://images.unsplash.com/photo-1525351484163-7529414344d8'),
+('Vegan Buddha Bowl', 'Rice, tofu, veggies', 500, 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd'),
+('Keto Chicken Plate', 'Low-carb chicken meal', 600, 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'),
+('Peanut Tofu Curry', 'Spicy curry with tofu', 530, 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd'),
+('Steak and Eggs', 'Classic high protein breakfast', 700, 'https://unsplash.com/photos/cooked-food-5tC2YOVXE9Y'),
+('Pasta Primavera', 'Pasta with fresh vegetables', 450, 'https://images.unsplash.com/photo-1473093226795-af9932fe5856'),
+('BLT Sandwich', 'Bacon, lettuce, tomato on bread', 500, 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3'),
+('Avocado Toast', 'Toast topped with avocado and egg', 400, 'https://images.unsplash.com/photo-1525351484163-7529414344d8'),
+('Spinach Salad', 'Fresh spinach with cheese and nuts', 300, 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd');
 
 -- 7. Recipe Ingredients (Linking recipes to ingredients)
 -- Grilled Chicken Bowl

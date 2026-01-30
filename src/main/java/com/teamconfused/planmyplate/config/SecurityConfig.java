@@ -33,6 +33,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/grocery-lists/**").permitAll()
                         .requestMatchers("/api/inventory/**").permitAll()
                         .requestMatchers("/api/reference-data/**").permitAll()
+                        .requestMatchers("/api/files/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

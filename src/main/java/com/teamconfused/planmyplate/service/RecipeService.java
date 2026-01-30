@@ -35,6 +35,7 @@ public class RecipeService {
         recipe.setCookTime(dto.getCookTime());
         recipe.setServings(dto.getServings());
         recipe.setInstructions(dto.getInstructions());
+        recipe.setImageUrl(dto.getImageUrl());
 
         // Create RecipeIngredient objects
         List<RecipeIngredient> recipeIngredients = new ArrayList<>();
@@ -74,6 +75,8 @@ public class RecipeService {
             existing.setServings(dto.getServings());
         if (dto.getInstructions() != null)
             existing.setInstructions(dto.getInstructions());
+        if (dto.getImageUrl() != null)
+            existing.setImageUrl(dto.getImageUrl());
 
         // Update ingredients if provided
         if (dto.getIngredients() != null) {

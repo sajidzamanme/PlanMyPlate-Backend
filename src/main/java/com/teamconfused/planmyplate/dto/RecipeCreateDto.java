@@ -12,5 +12,6 @@ public class RecipeCreateDto {
   private Integer cookTime;
   private Integer servings;
   private String instructions;
+  private String imageUrl;
   private List<RecipeIngredientDto> ingredients;
 }

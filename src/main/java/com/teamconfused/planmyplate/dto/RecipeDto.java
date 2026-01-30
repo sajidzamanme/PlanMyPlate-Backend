@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 public class RecipeDto {
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -15,8 +15,9 @@ public class RecipeDto {
         private String name;
         private String description;
         private Integer calories;
+        private String imageUrl;
     }
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -25,5 +26,6 @@ public class RecipeDto {
         private String name;
         private String description;
         private Integer calories;
+        private String imageUrl;
     }
 }
