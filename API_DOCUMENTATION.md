@@ -574,8 +574,34 @@ The API uses standard HTTP status codes and returns a structured JSON error resp
 }
 ```
 
-### Common Status Codes
+### Generate Detailed Meal Plan with AI
+Generate a weekly meal plan (21 meals) based on user preferences.
 
+- **URL:** `/api/ai/generate-meal-plan`
+- **Method:** `POST`
+- **Parameters:**
+    - `userId`: ID of the user (required)
+    - `startDate`: Start date in YYYY-MM-DD format (optional, defaults to today)
+- **Response Body:** Created `MealPlan` object with 21 slots.
+  ```json
+  {
+    "mpId": 12,
+    "startDate": "2026-02-12",
+    "duration": 7,
+    "status": "ACTIVE",
+    "slots": [
+      {
+        "id": 101,
+        "mealType": "Breakfast",
+        "dayNumber": 1,
+        "recipe": { ... }
+      },
+      ...
+    ]
+  }
+  ```
+
+### Common Status Codes
 | Status Code | Description | Scenario |
 |-------------|-------------|----------|
 | `200 OK` | Success | Request completed successfully. |

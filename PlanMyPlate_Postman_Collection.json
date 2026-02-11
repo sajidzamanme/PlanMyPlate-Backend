@@ -1015,6 +1015,29 @@
 							"path": ["ai", "generate-recipe"]
 						}
 					}
+				},
+				{
+					"name": "Generate Meal Plan with AI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ai/generate-meal-plan?userId={{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["ai", "generate-meal-plan"],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{userId}}"
+								}
+							]
+						}
+					}
 				}
 			]
 		}

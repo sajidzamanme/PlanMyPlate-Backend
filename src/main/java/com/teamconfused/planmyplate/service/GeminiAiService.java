@@ -3,11 +3,8 @@ package com.teamconfused.planmyplate.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamconfused.planmyplate.dto.AiRecipeRequestDto;
-import com.teamconfused.planmyplate.entity.Ingredient;
-import com.teamconfused.planmyplate.entity.Recipe;
-import com.teamconfused.planmyplate.entity.RecipeIngredient;
-import com.teamconfused.planmyplate.repository.IngredientRepository;
-import com.teamconfused.planmyplate.repository.RecipeRepository;
+import com.teamconfused.planmyplate.entity.*;
+import com.teamconfused.planmyplate.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -15,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +22,9 @@ public class GeminiAiService {
 
   private final RecipeRepository recipeRepository;
   private final IngredientRepository ingredientRepository;
+  private final UserPreferencesRepository userPreferencesRepository;
+  private final MealPlanRepository mealPlanRepository;
+  private final UserRepository userRepository;
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final RestTemplate restTemplate = new RestTemplate();
 
@@ -52,6 +54,84 @@ public class GeminiAiService {
     } catch (Exception e) {
       throw new RuntimeException("Failed to generate recipe with AI: " + e.getMessage(), e);
     }
+  }
+
+  @Transactional
+  public MealPlan generateWeeklyMealPlan(Integer userId, LocalDate startDate) {
+    try {
+      User user = userRepository.findById(userId)
+          .orElseThrow(() -> new RuntimeException("User not found"));
+
+      UserPreferences prefs = userPreferencesRepository.findByUser_UserId(userId)
+          .orElse(null); // Optional, can be null
+
+      MealPlan mealPlan = new MealPlan();
+      mealPlan.setUser(user);
+      mealPlan.setStartDate(startDate);
+      mealPlan.setDuration(7);
+      mealPlan.setStatus("ACTIVE");
+
+      List<MealSlot> slots = new ArrayList<>();
+      List<String> mealTypes = Arrays.asList("Breakfast", "Lunch", "Dinner");
+
+      // Generate recipes for each meal type (7 recipes each)
+      for (String mealType : mealTypes) {
+        String prompt = buildWeeklyMenuPrompt(prefs, mealType);
+        String aiResponse = callGeminiApi(prompt);
+        String jsonResponse = extractJson(aiResponse);
+        List<Recipe> recipes = parseRecipesFromJson(jsonResponse);
+
+        // Ensure we handle potentially fewer recipes than 7, though prompt asks for 7
+        for (int dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+          Recipe recipe;
+          if (recipes.size() > dayOfWeek) {
+            recipe = recipes.get(dayOfWeek);
+          } else if (!recipes.isEmpty()) {
+            // Fallback to cycling through generated recipes if fewer than 7 returned
+            recipe = recipes.get(dayOfWeek % recipes.size());
+          } else {
+            continue; // Skip slot if no recipes generated
+          }
+
+          // Check if recipe exists or save new one
+          // Basic check by name to avoid duplicates if re-generating same content?
+          // For now, simpler to just save as new AI recipe or use existing logic if we
+          // had unique constraints
+          // The parsing logic below creates new ingredients but doesn't check existing
+          // recipes by name deeply
+          // For MVP, we will save the recipe.
+          recipe = recipeRepository.save(recipe);
+
+          MealSlot slot = new MealSlot();
+          slot.setMealPlan(mealPlan);
+          slot.setRecipe(recipe);
+          slot.setMealType(mealType);
+          slot.setDayNumber(dayOfWeek + 1); // 1-based day index
+          slot.setSlotIndex(getSlotIndex(mealType, dayOfWeek)); // 0-20 index if needed, or by day/type
+
+          slots.add(slot);
+        }
+      }
+
+      mealPlan.setSlots(slots);
+      return mealPlanRepository.save(mealPlan);
+
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to generate weekly meal plan: " + e.getMessage(), e);
+    }
+  }
+
+  private int getSlotIndex(String mealType, int dayOfWeek) {
+    // 3 meals per day.
+    // Day 0: Breakfast=0, Lunch=1, Dinner=2
+    // Day 1: Breakfast=3, Lunch=4, Dinner=5
+    int typeOffset = 0;
+    if ("Lunch".equalsIgnoreCase(mealType))
+      typeOffset = 1;
+    else if ("Dinner".equalsIgnoreCase(mealType))
+      typeOffset = 2;
+
+    return (dayOfWeek * 3) + typeOffset;
   }
 
   private String callGeminiApi(String prompt) {
@@ -197,6 +277,46 @@ public class GeminiAiService {
     return prompt.toString();
   }
 
+  private String buildWeeklyMenuPrompt(UserPreferences prefs, String mealType) {
+    StringBuilder prompt = new StringBuilder();
+    prompt.append("You are a professional chef. Generate 7 DISTINCT ").append(mealType)
+        .append(" recipes for a weekly meal plan.\n\n");
+
+    if (prefs != null) {
+      if (prefs.getDiet() != null) {
+        prompt.append("Dietary Preference: ").append(prefs.getDiet().getDietName()).append("\n");
+      }
+      if (prefs.getAllergies() != null && !prefs.getAllergies().isEmpty()) {
+        String allergies = prefs.getAllergies().stream().map(Allergy::getAllergyName).collect(Collectors.joining(", "));
+        prompt.append("Allergies to Avoid: ").append(allergies).append("\n");
+      }
+      if (prefs.getDislikes() != null && !prefs.getDislikes().isEmpty()) {
+        String dislikes = prefs.getDislikes().stream().map(Ingredient::getName).collect(Collectors.joining(", "));
+        prompt.append("Ingredients to Avoid/Dislike: ").append(dislikes).append("\n");
+      }
+    }
+
+    prompt.append("\nPlease provide the response in the following JSON format ONLY:\n");
+    prompt.append("{\n");
+    prompt.append("  \"recipes\": [\n");
+    prompt.append("    {\n");
+    prompt.append("      \"name\": \"Recipe Name\",\n");
+    prompt.append("      \"description\": \"Brief description\",\n");
+    prompt.append("      \"calories\": 400,\n");
+    prompt.append("      \"prepTime\": 10,\n");
+    prompt.append("      \"cookTime\": 20,\n");
+    prompt.append("      \"servings\": 2,\n");
+    prompt.append("      \"instructions\": \"Step 1... Step 2...\",\n");
+    prompt.append("      \"ingredients\": [\n");
+    prompt.append("        {\"name\": \"Ing 1\", \"quantity\": 100, \"unit\": \"g\"}\n");
+    prompt.append("      ]\n");
+    prompt.append("    }\n");
+    prompt.append("  ]\n");
+    prompt.append("}\n");
+    prompt.append("Ensure there are exactly 7 recipes.");
+    return prompt.toString();
+  }
+
   private String extractJson(String response) {
     if (response == null || response.isEmpty()) {
       return "";
@@ -216,46 +336,64 @@ public class GeminiAiService {
   private Recipe parseRecipeFromJson(String jsonResponse, AiRecipeRequestDto request) {
     try {
       JsonNode rootNode = objectMapper.readTree(jsonResponse);
-
-      Recipe recipe = new Recipe();
-      recipe.setName(rootNode.get("name").asText());
-      recipe.setDescription(rootNode.get("description").asText());
-      recipe.setCalories(rootNode.get("calories").asInt());
-      recipe.setPrepTime(rootNode.get("prepTime").asInt());
-      recipe.setCookTime(rootNode.get("cookTime").asInt());
-      recipe.setServings(rootNode.get("servings").asInt());
-      recipe.setInstructions(rootNode.get("instructions").asText());
-      recipe.setImageUrl(null); // AI doesn't generate images
-
-      // Parse ingredients
-      List<RecipeIngredient> recipeIngredients = new ArrayList<>();
-      JsonNode ingredientsNode = rootNode.get("ingredients");
-
-      if (ingredientsNode != null && ingredientsNode.isArray()) {
-        for (JsonNode ingredientNode : ingredientsNode) {
-          String ingredientName = ingredientNode.get("name").asText();
-          int quantity = ingredientNode.get("quantity").asInt();
-          String unit = ingredientNode.get("unit").asText();
-
-          // Find or create ingredient in database
-          Ingredient ingredient = findOrCreateIngredient(ingredientName);
-
-          RecipeIngredient recipeIngredient = new RecipeIngredient();
-          recipeIngredient.setRecipe(recipe);
-          recipeIngredient.setIngredient(ingredient);
-          recipeIngredient.setQuantity(quantity);
-          recipeIngredient.setUnit(unit);
-
-          recipeIngredients.add(recipeIngredient);
-        }
-      }
-
-      recipe.setRecipeIngredients(recipeIngredients);
-      return recipe;
-
+      return parseRecipeNode(rootNode);
     } catch (Exception e) {
       throw new RuntimeException("Failed to parse AI response: " + e.getMessage(), e);
     }
+  }
+
+  private List<Recipe> parseRecipesFromJson(String jsonResponse) {
+    try {
+      JsonNode rootNode = objectMapper.readTree(jsonResponse);
+      JsonNode recipesNode = rootNode.get("recipes");
+      List<Recipe> recipes = new ArrayList<>();
+      if (recipesNode != null && recipesNode.isArray()) {
+        for (JsonNode node : recipesNode) {
+          recipes.add(parseRecipeNode(node));
+        }
+      }
+      return recipes;
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to parse weekly recipes: " + e.getMessage(), e);
+    }
+  }
+
+  private Recipe parseRecipeNode(JsonNode node) {
+    Recipe recipe = new Recipe();
+    recipe.setName(node.has("name") ? node.get("name").asText() : "Unknown Recipe");
+    recipe.setDescription(node.has("description") ? node.get("description").asText() : "");
+    recipe.setCalories(node.has("calories") ? node.get("calories").asInt() : 0);
+    recipe.setPrepTime(node.has("prepTime") ? node.get("prepTime").asInt() : 0);
+    recipe.setCookTime(node.has("cookTime") ? node.get("cookTime").asInt() : 0);
+    recipe.setServings(node.has("servings") ? node.get("servings").asInt() : 1);
+    recipe.setInstructions(node.has("instructions") ? node.get("instructions").asText() : "");
+    recipe.setImageUrl(null);
+
+    // Parse ingredients
+    List<RecipeIngredient> recipeIngredients = new ArrayList<>();
+    JsonNode ingredientsNode = node.get("ingredients");
+
+    if (ingredientsNode != null && ingredientsNode.isArray()) {
+      for (JsonNode ingredientNode : ingredientsNode) {
+        String ingredientName = ingredientNode.has("name") ? ingredientNode.get("name").asText() : "Unknown";
+        int quantity = ingredientNode.has("quantity") ? ingredientNode.get("quantity").asInt() : 0;
+        String unit = ingredientNode.has("unit") ? ingredientNode.get("unit").asText() : "";
+
+        // Find or create ingredient in database
+        Ingredient ingredient = findOrCreateIngredient(ingredientName);
+
+        RecipeIngredient recipeIngredient = new RecipeIngredient();
+        recipeIngredient.setRecipe(recipe);
+        recipeIngredient.setIngredient(ingredient);
+        recipeIngredient.setQuantity(quantity);
+        recipeIngredient.setUnit(unit);
+
+        recipeIngredients.add(recipeIngredient);
+      }
+    }
+
+    recipe.setRecipeIngredients(recipeIngredients);
+    return recipe;
   }
 
   private Ingredient findOrCreateIngredient(String name) {
