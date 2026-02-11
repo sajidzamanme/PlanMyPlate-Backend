@@ -10,9 +10,6 @@ import java.util.Optional;
 @Repository
 public interface AllergyRepository extends JpaRepository<Allergy, Integer> {
 
-    @Query(
-            value = "SELECT * FROM allergy WHERE allergy_name = :allergyName",
-            nativeQuery = true
-    )
+    @Query(value = "SELECT * FROM allergies WHERE allergy_name = :allergyName", nativeQuery = true)
     Optional<Allergy> findByAllergyName(@Param("allergyName") String allergyName);
 }

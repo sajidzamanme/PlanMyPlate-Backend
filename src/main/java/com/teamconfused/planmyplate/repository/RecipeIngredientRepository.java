@@ -10,11 +10,6 @@ import java.util.List;
 @Repository
 public interface RecipeIngredientRepository extends JpaRepository<RecipeIngredient, Integer> {
 
-    @Query(
-            value = "SELECT * FROM recipe_ingredient",
-            nativeQuery = true
-    )
+    @Query(value = "SELECT * FROM recipe_ingredients", nativeQuery = true)
     List<RecipeIngredient> findAllIngredients();
 }
-
-

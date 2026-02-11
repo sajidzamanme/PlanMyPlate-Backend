@@ -2,6 +2,7 @@ package com.teamconfused.planmyplate.service;
 
 import com.teamconfused.planmyplate.entity.MealPlan;
 import com.teamconfused.planmyplate.entity.User;
+import com.teamconfused.planmyplate.exception.ResourceNotFoundException;
 import com.teamconfused.planmyplate.repository.MealPlanRepository;
 import com.teamconfused.planmyplate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +22,11 @@ public class MealPlanService {
     }
 
     public MealPlan getById(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Meal plan not found"));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Meal plan", id));
     }
 
     public MealPlan create(Integer userId, MealPlan mealPlan) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
         mealPlan.setUser(user);
         if (mealPlan.getStartDate() == null) {
             mealPlan.setStartDate(LocalDate.now());
@@ -38,7 +39,7 @@ public class MealPlanService {
 
     public MealPlan update(Integer id, MealPlan mealPlan) {
         if (!repository.existsById(id))
-            throw new RuntimeException("Meal plan not found");
+            throw new ResourceNotFoundException("Meal plan", id);
         MealPlan existing = repository.findById(id).get();
         if (mealPlan.getStatus() != null)
             existing.setStatus(mealPlan.getStatus());
@@ -51,7 +52,7 @@ public class MealPlanService {
 
     public void delete(Integer id) {
         if (!repository.existsById(id))
-            throw new RuntimeException("Meal plan not found");
+            throw new ResourceNotFoundException("Meal plan", id);
         repository.deleteById(id);
     }
 
@@ -68,7 +69,7 @@ public class MealPlanService {
 
     @org.springframework.transaction.annotation.Transactional
     public MealPlan createWithRecipes(Integer userId, com.teamconfused.planmyplate.dto.MealPlanRequestDto dto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         MealPlan mealPlan = new MealPlan();
         mealPlan.setUser(user);
@@ -92,7 +93,7 @@ public class MealPlanService {
 
                 Integer recipeId = recipeIds.get(i);
                 com.teamconfused.planmyplate.entity.Recipe recipe = recipeRepository.findById(recipeId)
-                        .orElseThrow(() -> new RuntimeException("Recipe not found: " + recipeId));
+                        .orElseThrow(() -> new ResourceNotFoundException("Recipe", recipeId));
 
                 com.teamconfused.planmyplate.entity.MealSlot slot = new com.teamconfused.planmyplate.entity.MealSlot();
                 slot.setMealPlan(mealPlan);

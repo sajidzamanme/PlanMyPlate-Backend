@@ -4,6 +4,8 @@ This document provides a detailed reference for the PlanMyPlate API. It is desig
 
 **Base URL:** `/api`
 
+**Postman Collection:** A pre-configured Postman collection is available at [PlanMyPlate_Postman_Collection.json](file:///home/sajidzaman/Study/dbms/PlanMyPlate/PlanMyPlate_Postman_Collection.json). See the [Postman Guide](file:///home/sajidzaman/Study/dbms/PlanMyPlate/POSTMAN_GUIDE.md) for setup and testing workflows.
+
 ---
 
 ## 1. Authentication
@@ -479,3 +481,32 @@ Upload an image file to the server and get a URL to use in recipes.
   }
   ```
 
+---
+
+## 10. Error Handling
+
+The API uses standard HTTP status codes and returns a structured JSON error response for all failure cases.
+
+### Error Response Structure
+```json
+{
+  "timestamp": "2026-02-11T18:30:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Recipe not found with id: 123"
+}
+```
+
+### Common Status Codes
+
+| Status Code | Description | Scenario |
+|-------------|-------------|----------|
+| `200 OK` | Success | Request completed successfully. |
+| `201 Created` | Created | Resource (like a Recipe) was successfully created. |
+| `400 Bad Request` | Client Error | Missing required fields, invalid format, or business logic validation. |
+| `401 Unauthorized` | Auth Error | Missing or invalid JWT token. |
+| `404 Not Found` | Not Found | Requested resource (User, Recipe, Ingredient, etc.) does not exist. |
+| `409 Conflict` | Conflict | Resource already exists (e.g., duplicate email during Sign Up). |
+| `500 Server Error` | Internal Error| Something went wrong on the server. |
+
+---

@@ -5,6 +5,7 @@ import com.teamconfused.planmyplate.dto.RecipeIngredientDto;
 import com.teamconfused.planmyplate.entity.Ingredient;
 import com.teamconfused.planmyplate.entity.Recipe;
 import com.teamconfused.planmyplate.entity.RecipeIngredient;
+import com.teamconfused.planmyplate.exception.ResourceNotFoundException;
 import com.teamconfused.planmyplate.repository.IngredientRepository;
 import com.teamconfused.planmyplate.repository.RecipeRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,8 @@ public class RecipeService {
     }
 
     public Recipe getById(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Recipe not found"));
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", id));
     }
 
     public Recipe createRecipe(RecipeCreateDto dto) {
@@ -37,29 +39,15 @@ public class RecipeService {
         recipe.setInstructions(dto.getInstructions());
         recipe.setImageUrl(dto.getImageUrl());
 
-        // Create RecipeIngredient objects
-        List<RecipeIngredient> recipeIngredients = new ArrayList<>();
-        if (dto.getIngredients() != null) {
-            for (RecipeIngredientDto ingredientDto : dto.getIngredients()) {
-                Ingredient ingredient = ingredientRepository.findById(ingredientDto.getIngId())
-                        .orElseThrow(() -> new RuntimeException("Ingredient not found: " + ingredientDto.getIngId()));
-
-                RecipeIngredient ri = new RecipeIngredient();
-                ri.setRecipe(recipe);
-                ri.setIngredient(ingredient);
-                ri.setQuantity(ingredientDto.getQuantity());
-                ri.setUnit(ingredientDto.getUnit());
-                recipeIngredients.add(ri);
-            }
-        }
-        recipe.setRecipeIngredients(recipeIngredients);
+        // Map ingredients using helper method
+        recipe.setRecipeIngredients(mapRecipeIngredients(recipe, dto.getIngredients()));
 
         return repository.save(recipe);
     }
 
     public Recipe updateRecipe(Integer id, RecipeCreateDto dto) {
         Recipe existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Recipe not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", id));
 
         if (dto.getName() != null)
             existing.setName(dto.getName());
@@ -80,21 +68,8 @@ public class RecipeService {
 
         // Update ingredients if provided
         if (dto.getIngredients() != null) {
-            // Clear existing ingredients
             existing.getRecipeIngredients().clear();
-
-            // Add new ingredients
-            for (RecipeIngredientDto ingredientDto : dto.getIngredients()) {
-                Ingredient ingredient = ingredientRepository.findById(ingredientDto.getIngId())
-                        .orElseThrow(() -> new RuntimeException("Ingredient not found: " + ingredientDto.getIngId()));
-
-                RecipeIngredient ri = new RecipeIngredient();
-                ri.setRecipe(existing);
-                ri.setIngredient(ingredient);
-                ri.setQuantity(ingredientDto.getQuantity());
-                ri.setUnit(ingredientDto.getUnit());
-                existing.getRecipeIngredients().add(ri);
-            }
+            existing.getRecipeIngredients().addAll(mapRecipeIngredients(existing, dto.getIngredients()));
         }
 
         return repository.save(existing);
@@ -102,7 +77,7 @@ public class RecipeService {
 
     public void deleteRecipe(Integer id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Recipe not found");
+            throw new ResourceNotFoundException("Recipe", id);
         }
         repository.deleteById(id);
     }
@@ -113,5 +88,27 @@ public class RecipeService {
 
     public List<Recipe> filterByCalories(Integer minCalories, Integer maxCalories) {
         return repository.findByCaloriesBetween(minCalories, maxCalories);
+    }
+
+    /**
+     * Helper method to map ingredient DTOs to RecipeIngredient entities.
+     * Reduces code duplication between create and update operations.
+     */
+    private List<RecipeIngredient> mapRecipeIngredients(Recipe recipe, List<RecipeIngredientDto> ingredientDtos) {
+        List<RecipeIngredient> recipeIngredients = new ArrayList<>();
+        if (ingredientDtos != null) {
+            for (RecipeIngredientDto ingredientDto : ingredientDtos) {
+                Ingredient ingredient = ingredientRepository.findById(ingredientDto.getIngId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Ingredient", ingredientDto.getIngId()));
+
+                RecipeIngredient ri = new RecipeIngredient();
+                ri.setRecipe(recipe);
+                ri.setIngredient(ingredient);
+                ri.setQuantity(ingredientDto.getQuantity());
+                ri.setUnit(ingredientDto.getUnit());
+                recipeIngredients.add(ri);
+            }
+        }
+        return recipeIngredients;
     }
 }

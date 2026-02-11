@@ -2,6 +2,7 @@ package com.teamconfused.planmyplate.service;
 
 import com.teamconfused.planmyplate.entity.GroceryList;
 import com.teamconfused.planmyplate.entity.User;
+import com.teamconfused.planmyplate.exception.ResourceNotFoundException;
 import com.teamconfused.planmyplate.repository.GroceryListRepository;
 import com.teamconfused.planmyplate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +23,11 @@ public class GroceryListService {
     }
 
     public GroceryList getById(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Grocery list not found"));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Grocery list", id));
     }
 
     public GroceryList create(Integer userId, GroceryList groceryList) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
         groceryList.setUser(user);
         groceryList.setDateCreated(LocalDate.now());
         groceryList.setStatus("active");
@@ -35,7 +36,7 @@ public class GroceryListService {
 
     public GroceryList update(Integer id, GroceryList groceryList) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Grocery list not found");
+            throw new ResourceNotFoundException("Grocery list", id);
         }
         GroceryList existing = repository.findById(id).get();
         if (groceryList.getStatus() != null) {
@@ -49,7 +50,7 @@ public class GroceryListService {
 
     public void delete(Integer id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Grocery list not found");
+            throw new ResourceNotFoundException("Grocery list", id);
         }
         repository.deleteById(id);
     }
@@ -68,7 +69,7 @@ public class GroceryListService {
                 .orElseGet(() -> {
                     GroceryList newList = new GroceryList();
                     User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("User not found"));
+                            .orElseThrow(() -> new ResourceNotFoundException("User", userId));
                     newList.setUser(user);
                     newList.setDateCreated(LocalDate.now());
                     newList.setStatus("active");
@@ -103,7 +104,7 @@ public class GroceryListService {
     public com.teamconfused.planmyplate.entity.GroceryListItem updateItem(Integer itemId,
             com.teamconfused.planmyplate.dto.UpdateItemRequestDto request) {
         com.teamconfused.planmyplate.entity.GroceryListItem item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Grocery list item", itemId));
 
         if (request.getQuantity() != null) {
             if (request.getQuantity() <= 0) {
@@ -125,7 +126,7 @@ public class GroceryListService {
     @org.springframework.transaction.annotation.Transactional
     public void purchaseItems(Integer listId, List<Integer> ingredientIds) {
         GroceryList list = repository.findById(listId)
-                .orElseThrow(() -> new RuntimeException("Grocery list not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Grocery list", listId));
 
         if (ingredientIds == null || ingredientIds.isEmpty())
             return;

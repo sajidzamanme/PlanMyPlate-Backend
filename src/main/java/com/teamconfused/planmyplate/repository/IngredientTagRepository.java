@@ -9,10 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IngredientTagRepository extends JpaRepository<IngredientTag, Integer> {
 
-    @Query(
-            value = "SELECT * FROM ingredient_tag WHERE tag_name = :tagName",
-            nativeQuery = true
-    )
+    @Query(value = "SELECT * FROM ingredient_tags WHERE tag_name = :tagName", nativeQuery = true)
     IngredientTag findByTagName(@Param("tagName") String tagName);
 }
-

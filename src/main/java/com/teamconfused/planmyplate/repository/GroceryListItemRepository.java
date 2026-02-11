@@ -10,9 +10,6 @@ import java.util.List;
 @Repository
 public interface GroceryListItemRepository extends JpaRepository<GroceryListItem, Integer> {
 
-    @Query(
-            value = "SELECT * FROM grocery_list_item",
-            nativeQuery = true
-    )
+    @Query(value = "SELECT * FROM grocery_list_ingredients", nativeQuery = true)
     List<GroceryListItem> findAllItems();
 }

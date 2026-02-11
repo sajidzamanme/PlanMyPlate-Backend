@@ -12,13 +12,13 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query(
-            value = "SELECT * FROM user WHERE email = :email",
+            value = "SELECT * FROM users WHERE email = :email",
             nativeQuery = true
     )
     Optional<User> findByEmail(@Param("email") String email);
 
     @Query(
-            value = "SELECT * FROM user WHERE reset_token = :resetToken",
+            value = "SELECT * FROM users WHERE reset_token = :resetToken",
             nativeQuery = true
     )
     Optional<User> findByResetToken(@Param("resetToken") String resetToken);

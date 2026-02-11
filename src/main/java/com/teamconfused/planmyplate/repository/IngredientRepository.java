@@ -13,22 +13,13 @@ import java.util.Optional;
 @Repository
 public interface IngredientRepository extends JpaRepository<Ingredient, Integer> {
 
-    @Query(
-            value = "SELECT * FROM ingredient WHERE LOWER(name) LIKE CONCAT('%', LOWER(:name), '%')",
-            nativeQuery = true
-    )
-    List<Ingredient> findByNameContainingIgnoreCase(@Param("name") String name);
+        @Query(value = "SELECT * FROM ingredients WHERE LOWER(name) LIKE CONCAT('%', LOWER(:name), '%')", nativeQuery = true)
+        List<Ingredient> findByNameContainingIgnoreCase(@Param("name") String name);
 
-    @Query(
-            value = "SELECT * FROM ingredient WHERE price BETWEEN :minPrice AND :maxPrice",
-            nativeQuery = true
-    )
-    List<Ingredient> findByPriceBetween(@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice);
+        @Query(value = "SELECT * FROM ingredients WHERE price BETWEEN :minPrice AND :maxPrice", nativeQuery = true)
+        List<Ingredient> findByPriceBetween(@Param("minPrice") BigDecimal minPrice,
+                        @Param("maxPrice") BigDecimal maxPrice);
 
-    @Query(
-            value = "SELECT * FROM ingredient WHERE name = :name",
-            nativeQuery = true
-    )
-    Optional<Ingredient> findByName(@Param("name") String name);
+        @Query(value = "SELECT * FROM ingredients WHERE name = :name", nativeQuery = true)
+        Optional<Ingredient> findByName(@Param("name") String name);
 }
-

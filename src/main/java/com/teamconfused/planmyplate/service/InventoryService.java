@@ -3,6 +3,8 @@ package com.teamconfused.planmyplate.service;
 import com.teamconfused.planmyplate.entity.Inventory;
 import com.teamconfused.planmyplate.entity.InvItem;
 import com.teamconfused.planmyplate.entity.User;
+import com.teamconfused.planmyplate.exception.DuplicateResourceException;
+import com.teamconfused.planmyplate.exception.ResourceNotFoundException;
 import com.teamconfused.planmyplate.repository.InventoryRepository;
 import com.teamconfused.planmyplate.repository.InvItemRepository;
 import com.teamconfused.planmyplate.repository.UserRepository;
@@ -22,18 +24,18 @@ public class InventoryService {
 
     public Inventory getByUserId(Integer userId) {
         return repository.findByUser_UserId(userId)
-                .orElseThrow(() -> new RuntimeException("Inventory not found for user"));
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory for user", userId));
     }
 
     public Inventory getById(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Inventory not found"));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Inventory", id));
     }
 
     public Inventory createForUser(Integer userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         if (repository.findByUser_UserId(userId).isPresent()) {
-            throw new RuntimeException("Inventory already exists for this user");
+            throw new DuplicateResourceException("Inventory", "userId", userId);
         }
 
         Inventory inventory = new Inventory();
@@ -44,7 +46,7 @@ public class InventoryService {
 
     public Inventory update(Integer id, Inventory inventory) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Inventory not found");
+            throw new ResourceNotFoundException("Inventory", id);
         }
         Inventory existing = repository.findById(id).get();
         existing.setLastUpdate(LocalDate.now());
@@ -53,28 +55,28 @@ public class InventoryService {
 
     public void delete(Integer id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Inventory not found");
+            throw new ResourceNotFoundException("Inventory", id);
         }
         repository.deleteById(id);
     }
 
     public List<InvItem> getInventoryItems(Integer inventoryId) {
         if (!repository.existsById(inventoryId)) {
-            throw new RuntimeException("Inventory not found");
+            throw new ResourceNotFoundException("Inventory", inventoryId);
         }
         return invItemRepository.findByInventory_InvId(inventoryId);
     }
 
     public InvItem addItemToInventory(Integer inventoryId, InvItem item) {
         Inventory inventory = repository.findById(inventoryId)
-                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory", inventoryId));
         item.setInventory(inventory);
         return invItemRepository.save(item);
     }
 
     public void removeItemFromInventory(Integer itemId) {
         if (!invItemRepository.existsById(itemId)) {
-            throw new RuntimeException("Item not found");
+            throw new ResourceNotFoundException("Inventory item", itemId);
         }
         invItemRepository.deleteById(itemId);
     }
@@ -112,7 +114,7 @@ public class InventoryService {
 
     public InvItem updateItem(Integer itemId, com.teamconfused.planmyplate.dto.UpdateItemRequestDto request) {
         InvItem item = invItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory item", itemId));
 
         if (request.getQuantity() != null) {
             item.setQuantity(request.getQuantity());

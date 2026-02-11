@@ -10,9 +10,6 @@ import java.util.Optional;
 @Repository
 public interface DietRepository extends JpaRepository<Diet, Integer> {
 
-    @Query(
-            value = "SELECT * FROM diet WHERE diet_name = :dietName",
-            nativeQuery = true
-    )
+    @Query(value = "SELECT * FROM diets WHERE diet_name = :dietName", nativeQuery = true)
     Optional<Diet> findByDietName(@Param("dietName") String dietName);
 }
