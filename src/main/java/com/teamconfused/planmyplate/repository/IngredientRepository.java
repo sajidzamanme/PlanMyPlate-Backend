@@ -20,6 +20,9 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
         List<Ingredient> findByPriceBetween(@Param("minPrice") BigDecimal minPrice,
                         @Param("maxPrice") BigDecimal maxPrice);
 
+        @Query(value = "SELECT * FROM ingredients WHERE LOWER(name) = LOWER(:name) LIMIT 1", nativeQuery = true)
+        Optional<Ingredient> findByNameIgnoreCase(@Param("name") String name);
+
         @Query(value = "SELECT * FROM ingredients WHERE name = :name", nativeQuery = true)
         Optional<Ingredient> findByName(@Param("name") String name);
 }

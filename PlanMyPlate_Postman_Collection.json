@@ -987,6 +987,36 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "11. AI Recipe Generation",
+			"item": [
+				{
+					"name": "Generate Recipe with AI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"availableIngredients\": [\"chicken\", \"tomatoes\", \"garlic\", \"pasta\"],\n  \"maxCalories\": 600,\n  \"cuisineType\": \"Italian\",\n  \"allergies\": [\"peanuts\"],\n  \"dietaryPreference\": \"None\",\n  \"mood\": \"Comfort Food\",\n  \"servings\": 4,\n  \"maxCookingTime\": 45\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/generate-recipe",
+							"host": ["{{baseUrl}}"],
+							"path": ["ai", "generate-recipe"]
+						}
+					}
+				}
+			]
 		}
 	]
 }

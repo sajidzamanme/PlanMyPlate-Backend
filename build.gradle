@@ -31,6 +31,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    // Jackson for JSON processing (should be included with Spring Boot, but adding explicitly)
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
