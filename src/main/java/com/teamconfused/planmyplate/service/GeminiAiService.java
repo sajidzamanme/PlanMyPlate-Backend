@@ -49,8 +49,11 @@ public class GeminiAiService {
       // Parse the JSON response
       Recipe recipe = parseRecipeFromJson(jsonResponse, request);
 
-      // Save and return the recipe
-      return recipeRepository.save(recipe);
+      // Save only if it's a new recipe
+      if (recipe.getRecipeId() == null) {
+        return recipeRepository.save(recipe);
+      }
+      return recipe;
 
     } catch (Exception e) {
       throw new RuntimeException("Failed to generate recipe with AI: " + e.getMessage(), e);
@@ -101,7 +104,13 @@ public class GeminiAiService {
           // The parsing logic below creates new ingredients but doesn't check existing
           // recipes by name deeply
           // For MVP, we will save the recipe.
-          recipe = recipeRepository.save(recipe);
+          // If the AI says it's an existing recipe, we use it directly
+          if (recipe.getRecipeId() != null) {
+            // Optionally we could fetch it from DB to ensure it exists,
+            // but parseRecipeNode already handles this.
+          } else {
+            recipe = recipeRepository.save(recipe);
+          }
 
           MealSlot slot = new MealSlot();
           slot.setMealPlan(mealPlan);
@@ -214,6 +223,32 @@ public class GeminiAiService {
     }
   }
 
+  private String getDatabaseSummary() {
+    List<Recipe> recipes = recipeRepository.findAll();
+    StringBuilder summary = new StringBuilder();
+    summary.append("Existing Recipes in Database:\n");
+    for (Recipe r : recipes) {
+      summary.append("- ID: ").append(r.getRecipeId()).append(", Name: ").append(r.getName()).append(", Ingredients: ");
+      if (r.getRecipeIngredients() != null) {
+        String ingredients = r.getRecipeIngredients().stream()
+            .map(ri -> {
+              String name = ri.getIngredient().getName();
+              if (ri.getIngredient().getTags() != null && !ri.getIngredient().getTags().isEmpty()) {
+                String tags = ri.getIngredient().getTags().stream()
+                    .map(IngredientTag::getTagName)
+                    .collect(Collectors.joining("|"));
+                return name + "(" + tags + ")";
+              }
+              return name;
+            })
+            .collect(Collectors.joining(", "));
+        summary.append(ingredients);
+      }
+      summary.append("\n");
+    }
+    return summary.toString();
+  }
+
   private String listAvailableModels() {
     try {
       String url = "https://generativelanguage.googleapis.com/v1beta/models?key=" + geminiApiKey;
@@ -241,6 +276,10 @@ public class GeminiAiService {
     StringBuilder prompt = new StringBuilder();
     prompt.append(
         "You are a professional chef and recipe creator. Generate a detailed recipe based on the following requirements:\n\n");
+
+    prompt.append(getDatabaseSummary()).append("\n");
+    prompt.append(
+        "IMPORTANT: Before creating a new recipe, check if one of the 'Existing Recipes' above matches the user's request. If a suitable recipe exists, reuse it.\n\n");
 
     if (request.getAvailableIngredients() != null && !request.getAvailableIngredients().isEmpty()) {
       prompt.append("Available Ingredients: ").append(String.join(", ", request.getAvailableIngredients()))
@@ -275,6 +314,8 @@ public class GeminiAiService {
 
     prompt.append("\nPlease provide the recipe in the following JSON format ONLY (no additional text):\n");
     prompt.append("{\n");
+    prompt.append("  \"isNew\": true, // Set to false if you are reusing an existing recipe\n");
+    prompt.append("  \"recipeId\": null, // Provide the ID if you are reusing an existing recipe, otherwise null\n");
     prompt.append("  \"name\": \"Recipe Name\",\n");
     prompt.append("  \"description\": \"Brief description of the dish\",\n");
     prompt.append("  \"calories\": 450,\n");
@@ -282,6 +323,8 @@ public class GeminiAiService {
     prompt.append("  \"cookTime\": 30,\n");
     prompt.append("  \"servings\": ").append(request.getServings()).append(",\n");
     prompt.append("  \"instructions\": \"Step-by-step cooking instructions\",\n");
+    prompt.append(
+        "  \"imageUrl\": \"https://images.unsplash.com/photo-1234567890\", // Provide a high-quality Unsplash image URL suitable for the recipe\n");
     prompt.append("  \"ingredients\": [\n");
     prompt.append("    {\n");
     prompt.append("      \"name\": \"ingredient name\",\n");
@@ -290,7 +333,8 @@ public class GeminiAiService {
     prompt.append("    }\n");
     prompt.append("  ]\n");
     prompt.append("}\n");
-    prompt.append("\nIMPORTANT: Return ONLY the JSON object, no markdown formatting or additional text.");
+    prompt.append(
+        "\nIMPORTANT: Return ONLY the JSON object, no markdown formatting or additional text. If reusing a recipe, still provide its full details but set isNew to false and provide the recipeId.");
 
     return prompt.toString();
   }
@@ -299,6 +343,10 @@ public class GeminiAiService {
     StringBuilder prompt = new StringBuilder();
     prompt.append("You are a professional chef. Generate 7 DISTINCT ").append(mealType)
         .append(" recipes for a weekly meal plan.\n\n");
+
+    prompt.append(getDatabaseSummary()).append("\n");
+    prompt.append(
+        "IMPORTANT: Prefer reusing 'Existing Recipes' from the list above if they fit the plan. Only create new recipes if no suitable ones exist.\n\n");
 
     if (prefs != null) {
       if (prefs.getDiet() != null) {
@@ -318,6 +366,8 @@ public class GeminiAiService {
     prompt.append("{\n");
     prompt.append("  \"recipes\": [\n");
     prompt.append("    {\n");
+    prompt.append("      \"isNew\": true,\n");
+    prompt.append("      \"recipeId\": null, // if isNew is false, provide the ID from the database\n");
     prompt.append("      \"name\": \"Recipe Name\",\n");
     prompt.append("      \"description\": \"Brief description\",\n");
     prompt.append("      \"calories\": 400,\n");
@@ -325,13 +375,15 @@ public class GeminiAiService {
     prompt.append("      \"cookTime\": 20,\n");
     prompt.append("      \"servings\": 2,\n");
     prompt.append("      \"instructions\": \"Step 1... Step 2...\",\n");
+    prompt.append("      \"imageUrl\": \"https://images.unsplash.com/photo-1234567890\",\n");
     prompt.append("      \"ingredients\": [\n");
     prompt.append("        {\"name\": \"Ing 1\", \"quantity\": 100, \"unit\": \"g\"}\n");
     prompt.append("      ]\n");
     prompt.append("    }\n");
     prompt.append("  ]\n");
     prompt.append("}\n");
-    prompt.append("Ensure there are exactly 7 recipes.");
+    prompt
+        .append("Ensure there are exactly 7 recipes. For existing ones, provide full details but set isNew to false.");
     return prompt.toString();
   }
 
@@ -377,15 +429,32 @@ public class GeminiAiService {
   }
 
   private Recipe parseRecipeNode(JsonNode node) {
+    boolean isNew = node.has("isNew") ? node.get("isNew").asBoolean() : true;
+    Integer existingId = node.has("recipeId") && !node.get("recipeId").isNull() ? node.get("recipeId").asInt() : null;
+
+    if (!isNew && existingId != null) {
+      Optional<Recipe> existing = recipeRepository.findById(existingId);
+      if (existing.isPresent()) {
+        return existing.get();
+      }
+    }
+
+    // Double check by name if isNew is true but same name exists (deduplication)
+    String name = node.has("name") ? node.get("name").asText() : "Unknown Recipe";
+    Optional<Recipe> byName = recipeRepository.findByName(name);
+    if (byName.isPresent()) {
+      return byName.get();
+    }
+
     Recipe recipe = new Recipe();
-    recipe.setName(node.has("name") ? node.get("name").asText() : "Unknown Recipe");
+    recipe.setName(name);
     recipe.setDescription(node.has("description") ? node.get("description").asText() : "");
     recipe.setCalories(node.has("calories") ? node.get("calories").asInt() : 0);
     recipe.setPrepTime(node.has("prepTime") ? node.get("prepTime").asInt() : 0);
     recipe.setCookTime(node.has("cookTime") ? node.get("cookTime").asInt() : 0);
     recipe.setServings(node.has("servings") ? node.get("servings").asInt() : 1);
     recipe.setInstructions(node.has("instructions") ? node.get("instructions").asText() : "");
-    recipe.setImageUrl(null);
+    recipe.setImageUrl(node.has("imageUrl") ? node.get("imageUrl").asText() : null);
 
     // Parse ingredients
     List<RecipeIngredient> recipeIngredients = new ArrayList<>();

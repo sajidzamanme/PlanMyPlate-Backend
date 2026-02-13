@@ -11,16 +11,13 @@ import java.util.List;
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe, Integer> {
 
-    @Query(
-            value = "SELECT * FROM recipe WHERE LOWER(name) LIKE CONCAT('%', LOWER(:name), '%')",
-            nativeQuery = true
-    )
-    List<Recipe> findByNameContainingIgnoreCase(@Param("name") String name);
+        @Query(value = "SELECT * FROM recipe WHERE LOWER(name) LIKE CONCAT('%', LOWER(:name), '%')", nativeQuery = true)
+        List<Recipe> findByNameContainingIgnoreCase(@Param("name") String name);
 
-    @Query(
-            value = "SELECT * FROM recipe WHERE calories BETWEEN :minCalories AND :maxCalories",
-            nativeQuery = true
-    )
-    List<Recipe> findByCaloriesBetween(@Param("minCalories") Integer minCalories, @Param("maxCalories") Integer maxCalories);
+        @Query(value = "SELECT * FROM recipe WHERE calories BETWEEN :minCalories AND :maxCalories", nativeQuery = true)
+        List<Recipe> findByCaloriesBetween(@Param("minCalories") Integer minCalories,
+                        @Param("maxCalories") Integer maxCalories);
+
+        @Query(value = "SELECT * FROM recipe WHERE name = :name", nativeQuery = true)
+        java.util.Optional<Recipe> findByName(@Param("name") String name);
 }
-
