@@ -34,6 +34,9 @@ dependencies {
     
     // Jackson for JSON processing (should be included with Spring Boot, but adding explicitly)
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+    
+    // Dotenv to load .env files
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 }
 
 tasks.named('test') {

@@ -25,6 +25,7 @@ public class GeminiAiService {
   private final UserPreferencesRepository userPreferencesRepository;
   private final MealPlanRepository mealPlanRepository;
   private final UserRepository userRepository;
+  private final GroceryListService groceryListService;
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final RestTemplate restTemplate = new RestTemplate();
 
@@ -114,6 +115,23 @@ public class GeminiAiService {
       }
 
       mealPlan.setSlots(slots);
+
+      // Collect unique ingredients for the grocery list
+      Set<Ingredient> allIngredients = new HashSet<>();
+      for (MealSlot slot : slots) {
+        Recipe recipe = slot.getRecipe();
+        if (recipe != null && recipe.getRecipeIngredients() != null) {
+          for (RecipeIngredient ri : recipe.getRecipeIngredients()) {
+            allIngredients.add(ri.getIngredient());
+          }
+        }
+      }
+
+      // Add ingredients to the user's active grocery list
+      if (!allIngredients.isEmpty()) {
+        groceryListService.addIngredients(userId, allIngredients);
+      }
+
       return mealPlanRepository.save(mealPlan);
 
     } catch (Exception e) {

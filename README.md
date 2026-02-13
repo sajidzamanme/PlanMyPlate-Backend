@@ -75,18 +75,23 @@ USE plan_my_plate;
 -- Run the SQL schema file
 ```
 
-### 2. Clone and Configure Project
+### 2. Configure Environment Variables
 
-```bash
-cd /home/sajidzaman/Study/dbms/PlanMyPlate
-```
+The application uses environment variables for sensitive configurations. 
 
-Update `src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:8050/plan_my_plate
-spring.datasource.username=root
-spring.datasource.password=your_password
-```
+1. Copy the template:
+   ```bash
+   cp .env.example .env
+   ```
+2. Open `.env` and fill in your actual values:
+   - `DB_URL`: MySQL connection string (default: `jdbc:mysql://localhost:8050/plan_my_plate`)
+   - `DB_USERNAME`: Database username (default: `root`)
+   - `DB_PASSWORD`: Database password
+   - `JWT_SECRET`: A secure random string for JWT signing
+   - `GEMINI_API_KEY`: Your Google Gemini API key
+
+> [!TIP]
+> You can also set these variables in your IDE (IntelliJ, VS Code) or your shell environment.
 
 ### 3. Build Project
 
@@ -373,5 +378,5 @@ For issues or questions, contact: support@planmyplate.com
 
 ---
 
-**Last Updated:** January 28, 2026
-**Version:** 1.0.0
+**Last Updated:** February 13, 2026
+**Version:** 1.1.0
