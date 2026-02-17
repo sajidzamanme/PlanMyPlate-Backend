@@ -260,26 +260,226 @@ VALUES
 
 
 INSERT INTO recipe_ingredients (recipe_id, ing_id) VALUES
-((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'),(SELECT ing_id FROM ingredients WHERE name='Chicken')),
-((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'),(SELECT ing_id FROM ingredients WHERE name='Onion')),
-((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'),(SELECT ing_id FROM ingredients WHERE name='Garlic')),
-((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'),(SELECT ing_id FROM ingredients WHERE name='Ginger')),
-((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'),(SELECT ing_id FROM ingredients WHERE name='Turmeric')),
 
-((SELECT recipe_id FROM recipe WHERE name='Beef Bhuna'),(SELECT ing_id FROM ingredients WHERE name='Beef')),
-((SELECT recipe_id FROM recipe WHERE name='Beef Bhuna'),(SELECT ing_id FROM ingredients WHERE name='Onion')),
-((SELECT recipe_id FROM recipe WHERE name='Beef Bhuna'),(SELECT ing_id FROM ingredients WHERE name='Garlic')),
+-- Chicken Bhuna
+((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Garlic')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Ginger')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Turmeric')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
 
-((SELECT recipe_id FROM recipe WHERE name='Dal Tadka'),(SELECT ing_id FROM ingredients WHERE name='Lentils (Dal)')),
-((SELECT recipe_id FROM recipe WHERE name='Dal Tadka'),(SELECT ing_id FROM ingredients WHERE name='Garlic')),
-((SELECT recipe_id FROM recipe WHERE name='Dal Tadka'),(SELECT ing_id FROM ingredients WHERE name='Cumin')),
-((SELECT recipe_id FROM recipe WHERE name='Dal Tadka'),(SELECT ing_id FROM ingredients WHERE name='Soybean Oil')),
+-- Beef Bhuna
+((SELECT recipe_id FROM recipe WHERE name='Beef Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Beef')),
+((SELECT recipe_id FROM recipe WHERE name='Beef Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Beef Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Garlic')),
+((SELECT recipe_id FROM recipe WHERE name='Beef Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
 
-((SELECT recipe_id FROM recipe WHERE name='Egg Curry'),(SELECT ing_id FROM ingredients WHERE name='Eggs')),
-((SELECT recipe_id FROM recipe WHERE name='Egg Curry'),(SELECT ing_id FROM ingredients WHERE name='Onion')),
-((SELECT recipe_id FROM recipe WHERE name='Egg Curry'),(SELECT ing_id FROM ingredients WHERE name='Tomato')),
+-- Mutton Rezala
+((SELECT recipe_id FROM recipe WHERE name='Mutton Rezala'), (SELECT ing_id FROM ingredients WHERE name='Mutton')),
+((SELECT recipe_id FROM recipe WHERE name='Mutton Rezala'), (SELECT ing_id FROM ingredients WHERE name='Yogurt')),
+((SELECT recipe_id FROM recipe WHERE name='Mutton Rezala'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Mutton Rezala'), (SELECT ing_id FROM ingredients WHERE name='Garlic')),
 
-((SELECT recipe_id FROM recipe WHERE name='Simple Omelette'),(SELECT ing_id FROM ingredients WHERE name='Eggs')),
-((SELECT recipe_id FROM recipe WHERE name='Simple Omelette'),(SELECT ing_id FROM ingredients WHERE name='Milk')),
-((SELECT recipe_id FROM recipe WHERE name='Simple Omelette'),(SELECT ing_id FROM ingredients WHERE name='Salt'));
+-- Hilsa Bhapa
+((SELECT recipe_id FROM recipe WHERE name='Hilsa Bhapa'), (SELECT ing_id FROM ingredients WHERE name='Hilsa Fish')),
+((SELECT recipe_id FROM recipe WHERE name='Hilsa Bhapa'), (SELECT ing_id FROM ingredients WHERE name='Green Chili')),
+((SELECT recipe_id FROM recipe WHERE name='Hilsa Bhapa'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
+
+-- Rui Machher Jhol
+((SELECT recipe_id FROM recipe WHERE name='Rui Machher Jhol'), (SELECT ing_id FROM ingredients WHERE name='Rui Fish')),
+((SELECT recipe_id FROM recipe WHERE name='Rui Machher Jhol'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+((SELECT recipe_id FROM recipe WHERE name='Rui Machher Jhol'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Rui Machher Jhol'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
+
+-- Chingri Malai Curry
+((SELECT recipe_id FROM recipe WHERE name='Chingri Malai Curry'), (SELECT ing_id FROM ingredients WHERE name='Shrimp')),
+((SELECT recipe_id FROM recipe WHERE name='Chingri Malai Curry'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Chingri Malai Curry'), (SELECT ing_id FROM ingredients WHERE name='Milk')),
+
+-- Dal Tadka
+((SELECT recipe_id FROM recipe WHERE name='Dal Tadka'), (SELECT ing_id FROM ingredients WHERE name='Lentils (Dal)')),
+((SELECT recipe_id FROM recipe WHERE name='Dal Tadka'), (SELECT ing_id FROM ingredients WHERE name='Garlic')),
+((SELECT recipe_id FROM recipe WHERE name='Dal Tadka'), (SELECT ing_id FROM ingredients WHERE name='Cumin')),
+((SELECT recipe_id FROM recipe WHERE name='Dal Tadka'), (SELECT ing_id FROM ingredients WHERE name='Soybean Oil')),
+
+-- Khichuri
+((SELECT recipe_id FROM recipe WHERE name='Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+((SELECT recipe_id FROM recipe WHERE name='Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Lentils (Dal)')),
+((SELECT recipe_id FROM recipe WHERE name='Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Soybean Oil')),
+
+-- Egg Curry
+((SELECT recipe_id FROM recipe WHERE name='Egg Curry'), (SELECT ing_id FROM ingredients WHERE name='Eggs')),
+((SELECT recipe_id FROM recipe WHERE name='Egg Curry'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Egg Curry'), (SELECT ing_id FROM ingredients WHERE name='Tomato')),
+
+-- Chicken Biryani
+((SELECT recipe_id FROM recipe WHERE name='Chicken Biryani'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Biryani'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Biryani'), (SELECT ing_id FROM ingredients WHERE name='Yogurt')),
+
+-- Tehari
+((SELECT recipe_id FROM recipe WHERE name='Tehari'), (SELECT ing_id FROM ingredients WHERE name='Beef')),
+((SELECT recipe_id FROM recipe WHERE name='Tehari'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+
+-- Vegetable Khichuri
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Lentils (Dal)')),
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Cauliflower')),
+
+-- Begun Bhorta
+((SELECT recipe_id FROM recipe WHERE name='Begun Bhorta'), (SELECT ing_id FROM ingredients WHERE name='Eggplant')),
+((SELECT recipe_id FROM recipe WHERE name='Begun Bhorta'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Begun Bhorta'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
+
+-- Alu Bhorta
+((SELECT recipe_id FROM recipe WHERE name='Alu Bhorta'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+((SELECT recipe_id FROM recipe WHERE name='Alu Bhorta'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Alu Bhorta'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
+
+-- Shak Bhaji
+((SELECT recipe_id FROM recipe WHERE name='Shak Bhaji'), (SELECT ing_id FROM ingredients WHERE name='Spinach')),
+((SELECT recipe_id FROM recipe WHERE name='Shak Bhaji'), (SELECT ing_id FROM ingredients WHERE name='Garlic')),
+
+-- Mixed Vegetable Curry
+((SELECT recipe_id FROM recipe WHERE name='Mixed Vegetable Curry'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+((SELECT recipe_id FROM recipe WHERE name='Mixed Vegetable Curry'), (SELECT ing_id FROM ingredients WHERE name='Cauliflower')),
+((SELECT recipe_id FROM recipe WHERE name='Mixed Vegetable Curry'), (SELECT ing_id FROM ingredients WHERE name='Cabbage')),
+
+-- Chickpea Curry
+((SELECT recipe_id FROM recipe WHERE name='Chickpea Curry'), (SELECT ing_id FROM ingredients WHERE name='Chickpeas')),
+((SELECT recipe_id FROM recipe WHERE name='Chickpea Curry'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Chickpea Curry'), (SELECT ing_id FROM ingredients WHERE name='Tomato')),
+
+-- Chicken Korma
+((SELECT recipe_id FROM recipe WHERE name='Chicken Korma'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Korma'), (SELECT ing_id FROM ingredients WHERE name='Yogurt')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Korma'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+
+-- Beef Curry
+((SELECT recipe_id FROM recipe WHERE name='Beef Curry'), (SELECT ing_id FROM ingredients WHERE name='Beef')),
+((SELECT recipe_id FROM recipe WHERE name='Beef Curry'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+
+-- Fish Fry
+((SELECT recipe_id FROM recipe WHERE name='Fish Fry'), (SELECT ing_id FROM ingredients WHERE name='Rui Fish')),
+((SELECT recipe_id FROM recipe WHERE name='Fish Fry'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
+
+-- Chicken Jhal Fry
+((SELECT recipe_id FROM recipe WHERE name='Chicken Jhal Fry'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Jhal Fry'), (SELECT ing_id FROM ingredients WHERE name='Green Chili')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Jhal Fry'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+
+-- Egg Bhurji
+((SELECT recipe_id FROM recipe WHERE name='Egg Bhurji'), (SELECT ing_id FROM ingredients WHERE name='Eggs')),
+((SELECT recipe_id FROM recipe WHERE name='Egg Bhurji'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Egg Bhurji'), (SELECT ing_id FROM ingredients WHERE name='Green Chili')),
+
+-- Vegetable Pulao
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Pulao'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Pulao'), (SELECT ing_id FROM ingredients WHERE name='Cauliflower')),
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Pulao'), (SELECT ing_id FROM ingredients WHERE name='Carrot')),
+
+-- Plain Rice and Dal
+((SELECT recipe_id FROM recipe WHERE name='Plain Rice and Dal'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+((SELECT recipe_id FROM recipe WHERE name='Plain Rice and Dal'), (SELECT ing_id FROM ingredients WHERE name='Lentils (Dal)')),
+
+-- Muri Mix
+((SELECT recipe_id FROM recipe WHERE name='Muri Mix'), (SELECT ing_id FROM ingredients WHERE name='Puffed Rice (Muri)')),
+((SELECT recipe_id FROM recipe WHERE name='Muri Mix'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+((SELECT recipe_id FROM recipe WHERE name='Muri Mix'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
+
+-- Chicken Soup
+((SELECT recipe_id FROM recipe WHERE name='Chicken Soup'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Soup'), (SELECT ing_id FROM ingredients WHERE name='Garlic')),
+
+-- Vegetable Soup
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Soup'), (SELECT ing_id FROM ingredients WHERE name='Carrot')),
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Soup'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+
+-- Chicken Cutlet
+((SELECT recipe_id FROM recipe WHERE name='Chicken Cutlet'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Cutlet'), (SELECT ing_id FROM ingredients WHERE name='Eggs')),
+
+-- Vegetable Cutlet
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Cutlet'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Cutlet'), (SELECT ing_id FROM ingredients WHERE name='Cauliflower')),
+
+-- Shrimp Bhuna
+((SELECT recipe_id FROM recipe WHERE name='Shrimp Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Shrimp')),
+((SELECT recipe_id FROM recipe WHERE name='Shrimp Bhuna'), (SELECT ing_id FROM ingredients WHERE name='Onion')),
+
+-- Fish Curry with Potato
+((SELECT recipe_id FROM recipe WHERE name='Fish Curry with Potato'), (SELECT ing_id FROM ingredients WHERE name='Rui Fish')),
+((SELECT recipe_id FROM recipe WHERE name='Fish Curry with Potato'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+
+-- Spinach Dal
+((SELECT recipe_id FROM recipe WHERE name='Spinach Dal'), (SELECT ing_id FROM ingredients WHERE name='Spinach')),
+((SELECT recipe_id FROM recipe WHERE name='Spinach Dal'), (SELECT ing_id FROM ingredients WHERE name='Lentils (Dal)')),
+
+-- Eggplant Curry
+((SELECT recipe_id FROM recipe WHERE name='Eggplant Curry'), (SELECT ing_id FROM ingredients WHERE name='Eggplant')),
+((SELECT recipe_id FROM recipe WHERE name='Eggplant Curry'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+
+-- Cabbage Fry
+((SELECT recipe_id FROM recipe WHERE name='Cabbage Fry'), (SELECT ing_id FROM ingredients WHERE name='Cabbage')),
+((SELECT recipe_id FROM recipe WHERE name='Cabbage Fry'), (SELECT ing_id FROM ingredients WHERE name='Garlic')),
+
+-- Cauliflower Curry
+((SELECT recipe_id FROM recipe WHERE name='Cauliflower Curry'), (SELECT ing_id FROM ingredients WHERE name='Cauliflower')),
+((SELECT recipe_id FROM recipe WHERE name='Cauliflower Curry'), (SELECT ing_id FROM ingredients WHERE name='Potato')),
+
+-- Chicken Fried Rice
+((SELECT recipe_id FROM recipe WHERE name='Chicken Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Eggs')),
+
+-- Vegetable Fried Rice
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+((SELECT recipe_id FROM recipe WHERE name='Vegetable Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Cauliflower')),
+
+-- Beef Fried Rice
+((SELECT recipe_id FROM recipe WHERE name='Beef Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Beef')),
+((SELECT recipe_id FROM recipe WHERE name='Beef Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+
+-- Egg Fried Rice
+((SELECT recipe_id FROM recipe WHERE name='Egg Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Eggs')),
+((SELECT recipe_id FROM recipe WHERE name='Egg Fried Rice'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+
+-- Tofu Vegetable Curry
+((SELECT recipe_id FROM recipe WHERE name='Tofu Vegetable Curry'), (SELECT ing_id FROM ingredients WHERE name='Tofu')),
+((SELECT recipe_id FROM recipe WHERE name='Tofu Vegetable Curry'), (SELECT ing_id FROM ingredients WHERE name='Cauliflower')),
+
+-- Vegan Dal Khichuri
+((SELECT recipe_id FROM recipe WHERE name='Vegan Dal Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Rice')),
+((SELECT recipe_id FROM recipe WHERE name='Vegan Dal Khichuri'), (SELECT ing_id FROM ingredients WHERE name='Lentils (Dal)')),
+
+-- Low Carb Chicken Bowl
+((SELECT recipe_id FROM recipe WHERE name='Low Carb Chicken Bowl'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Low Carb Chicken Bowl'), (SELECT ing_id FROM ingredients WHERE name='Spinach')),
+
+-- High Protein Egg Bowl
+((SELECT recipe_id FROM recipe WHERE name='High Protein Egg Bowl'), (SELECT ing_id FROM ingredients WHERE name='Eggs')),
+((SELECT recipe_id FROM recipe WHERE name='High Protein Egg Bowl'), (SELECT ing_id FROM ingredients WHERE name='Spinach')),
+
+-- Diabetic Fish Curry
+((SELECT recipe_id FROM recipe WHERE name='Diabetic Fish Curry'), (SELECT ing_id FROM ingredients WHERE name='Rui Fish')),
+((SELECT recipe_id FROM recipe WHERE name='Diabetic Fish Curry'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
+
+-- Mustard Fish Curry
+((SELECT recipe_id FROM recipe WHERE name='Mustard Fish Curry'), (SELECT ing_id FROM ingredients WHERE name='Rui Fish')),
+((SELECT recipe_id FROM recipe WHERE name='Mustard Fish Curry'), (SELECT ing_id FROM ingredients WHERE name='Mustard Oil')),
+
+-- Chicken Vegetable Stir Fry
+((SELECT recipe_id FROM recipe WHERE name='Chicken Vegetable Stir Fry'), (SELECT ing_id FROM ingredients WHERE name='Chicken')),
+((SELECT recipe_id FROM recipe WHERE name='Chicken Vegetable Stir Fry'), (SELECT ing_id FROM ingredients WHERE name='Cauliflower')),
+
+-- Beef Vegetable Stir Fry
+((SELECT recipe_id FROM recipe WHERE name='Beef Vegetable Stir Fry'), (SELECT ing_id FROM ingredients WHERE name='Beef')),
+((SELECT recipe_id FROM recipe WHERE name='Beef Vegetable Stir Fry'), (SELECT ing_id FROM ingredients WHERE name='Cabbage')),
+
+-- Simple Omelette
+((SELECT recipe_id FROM recipe WHERE name='Simple Omelette'), (SELECT ing_id FROM ingredients WHERE name='Eggs')),
+((SELECT recipe_id FROM recipe WHERE name='Simple Omelette'), (SELECT ing_id FROM ingredients WHERE name='Milk'));
+
 

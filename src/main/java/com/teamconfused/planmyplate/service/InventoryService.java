@@ -82,16 +82,16 @@ public class InventoryService {
     }
 
     public InvItem addToInventory(Integer userId, com.teamconfused.planmyplate.entity.Ingredient ingredient,
-            int quantity) {
+            int quantity, String unit) {
         Inventory inventory = repository.findByUser_UserId(userId)
                 .orElseGet(() -> createForUser(userId));
 
-        // Check if item already exists
+        // Check if item already exists with same unit
         List<InvItem> items = invItemRepository.findByInventory_InvId(inventory.getInvId());
         for (InvItem existing : items) {
-            if (existing.getIngredient().getIngId().equals(ingredient.getIngId())) {
+            if (existing.getIngredient().getIngId().equals(ingredient.getIngId())
+                    && existing.getUnit() != null && existing.getUnit().equalsIgnoreCase(unit)) {
                 existing.setQuantity(existing.getQuantity() + quantity);
-                // InvItem doesn't have lastUpdate, only Inventory does
                 inventory.setLastUpdate(LocalDate.now());
                 repository.save(inventory);
                 return invItemRepository.save(existing);
@@ -102,6 +102,7 @@ public class InventoryService {
         newItem.setInventory(inventory);
         newItem.setIngredient(ingredient);
         newItem.setQuantity(quantity);
+        newItem.setUnit(unit);
         newItem.setDateAdded(LocalDate.now());
         // Default expiry date logic could go here, e.g., +1 week
         newItem.setExpiryDate(LocalDate.now().plusWeeks(1));

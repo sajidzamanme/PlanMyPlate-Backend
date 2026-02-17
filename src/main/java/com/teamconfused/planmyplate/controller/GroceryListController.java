@@ -49,7 +49,7 @@ public class GroceryListController {
     @PostMapping("/{id}/purchase")
     public ResponseEntity<Void> purchase(@PathVariable Integer id,
             @RequestBody com.teamconfused.planmyplate.dto.PurchaseRequestDto dto) {
-        service.purchaseItems(id, dto.getIngredientIds());
+        service.purchaseItems(id, dto.getItems());
         return ResponseEntity.ok().build();
     }
 

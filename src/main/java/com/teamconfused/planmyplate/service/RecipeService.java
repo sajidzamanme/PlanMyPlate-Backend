@@ -104,7 +104,7 @@ public class RecipeService {
                 RecipeIngredient ri = new RecipeIngredient();
                 ri.setRecipe(recipe);
                 ri.setIngredient(ingredient);
-                ri.setQuantity(ingredientDto.getQuantity());
+                ri.setQuantity(ingredientDto.getQuantity() != null ? ingredientDto.getQuantity() : 1);
                 ri.setUnit(ingredientDto.getUnit());
                 recipeIngredients.add(ri);
             }

@@ -5,5 +5,5 @@ import java.util.List;
 
 @Data
 public class PurchaseRequestDto {
-  private List<Integer> ingredientIds;
+  private List<PurchaseItemInfo> items;
 }

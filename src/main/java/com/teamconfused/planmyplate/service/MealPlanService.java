@@ -111,22 +111,56 @@ public class MealPlanService {
                 slots.add(slot);
             }
 
-            // Collect ingredients for grocery list (unique recipes only)
-            java.util.Set<com.teamconfused.planmyplate.entity.Ingredient> ingredients = new java.util.HashSet<>();
+            // Collect ingredients for grocery list with aggregated quantities
+            // Use a map to aggregate quantities: key = (ingredientId, unit), value = total
+            // quantity
+            java.util.Map<String, com.teamconfused.planmyplate.dto.IngredientQuantityDto> ingredientMap = new java.util.HashMap<>();
+
+            // Count how many times each recipe appears in the meal plan
+            java.util.Map<Integer, Integer> recipeCount = new java.util.HashMap<>();
+            for (Integer recipeId : recipeIds) {
+                recipeCount.put(recipeId, recipeCount.getOrDefault(recipeId, 0) + 1);
+            }
+
+            // Get unique recipes
             java.util.Set<Integer> uniqueRecipeIds = new java.util.HashSet<>(recipeIds);
             List<com.teamconfused.planmyplate.entity.Recipe> uniqueRecipes = recipeRepository
                     .findAllById(uniqueRecipeIds);
 
             for (com.teamconfused.planmyplate.entity.Recipe recipe : uniqueRecipes) {
                 if (recipe.getRecipeIngredients() != null) {
+                    int multiplier = recipeCount.get(recipe.getRecipeId());
+
                     for (com.teamconfused.planmyplate.entity.RecipeIngredient ri : recipe.getRecipeIngredients()) {
-                        ingredients.add(ri.getIngredient());
+                        Integer riQuantity = ri.getQuantity();
+                        if (riQuantity == null) {
+                            riQuantity = 0; // Or 1, depending on business logic, but 0 is safer for aggregation
+                        }
+
+                        String key = ri.getIngredient().getIngId() + "_" +
+                                (ri.getUnit() != null ? ri.getUnit().toLowerCase() : "unit");
+
+                        if (ingredientMap.containsKey(key)) {
+                            // Aggregate quantity
+                            com.teamconfused.planmyplate.dto.IngredientQuantityDto existing = ingredientMap.get(key);
+                            existing.setQuantity(existing.getQuantity() + (riQuantity * multiplier));
+                        } else {
+                            // Add new entry
+                            com.teamconfused.planmyplate.dto.IngredientQuantityDto ingredientDto = new com.teamconfused.planmyplate.dto.IngredientQuantityDto(
+                                    ri.getIngredient(),
+                                    riQuantity * multiplier,
+                                    ri.getUnit() != null ? ri.getUnit() : "unit");
+                            ingredientMap.put(key, ingredientDto);
+                        }
                     }
                 }
             }
 
-            // Add ingredients to grocery list
-            groceryListService.addIngredients(userId, ingredients);
+            // Add ingredients to grocery list with quantities
+            if (!ingredientMap.isEmpty()) {
+                groceryListService.addIngredientsWithQuantities(userId,
+                        new java.util.ArrayList<>(ingredientMap.values()));
+            }
         }
 
         return repository.save(mealPlan);
