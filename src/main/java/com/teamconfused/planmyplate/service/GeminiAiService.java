@@ -26,6 +26,7 @@ public class GeminiAiService {
   private final MealPlanRepository mealPlanRepository;
   private final UserRepository userRepository;
   private final GroceryListService groceryListService;
+  private final MealPlanService mealPlanService;
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final RestTemplate restTemplate = new RestTemplate();
 
@@ -69,11 +70,15 @@ public class GeminiAiService {
       UserPreferences prefs = userPreferencesRepository.findByUser_UserId(userId)
           .orElse(null); // Optional, can be null
 
+      // Deactivate existing meal plans and grocery lists
+      mealPlanService.deactivateActiveMealPlans(userId);
+      groceryListService.deactivateActiveLists(userId);
+
       MealPlan mealPlan = new MealPlan();
       mealPlan.setUser(user);
       mealPlan.setStartDate(startDate);
       mealPlan.setDuration(7);
-      mealPlan.setStatus("ACTIVE");
+      mealPlan.setStatus("active");
 
       List<MealSlot> slots = new ArrayList<>();
       List<String> mealTypes = Arrays.asList("Breakfast", "Lunch", "Dinner");
@@ -125,20 +130,37 @@ public class GeminiAiService {
 
       mealPlan.setSlots(slots);
 
-      // Collect unique ingredients for the grocery list
-      Set<Ingredient> allIngredients = new HashSet<>();
+      // Collect unique ingredients for the grocery list with aggregated quantities
+      // key = (ingredientId + "_" + unit.toLowerCase()), value = DTO
+      Map<String, com.teamconfused.planmyplate.dto.IngredientQuantityDto> ingredientMap = new HashMap<>();
+
       for (MealSlot slot : slots) {
         Recipe recipe = slot.getRecipe();
         if (recipe != null && recipe.getRecipeIngredients() != null) {
           for (RecipeIngredient ri : recipe.getRecipeIngredients()) {
-            allIngredients.add(ri.getIngredient());
+            Integer riQuantity = ri.getQuantity();
+            if (riQuantity == null || riQuantity <= 0) {
+              riQuantity = 1; // Default to 1
+            }
+
+            String unit = (ri.getUnit() != null && !ri.getUnit().trim().isEmpty()) ? ri.getUnit() : "unit";
+            String key = ri.getIngredient().getIngId() + "_" + unit.toLowerCase();
+
+            if (ingredientMap.containsKey(key)) {
+              com.teamconfused.planmyplate.dto.IngredientQuantityDto existing = ingredientMap.get(key);
+              existing.setQuantity(existing.getQuantity() + riQuantity);
+            } else {
+              com.teamconfused.planmyplate.dto.IngredientQuantityDto dto = new com.teamconfused.planmyplate.dto.IngredientQuantityDto(
+                  ri.getIngredient(), riQuantity, unit);
+              ingredientMap.put(key, dto);
+            }
           }
         }
       }
 
-      // Add ingredients to the user's active grocery list
-      if (!allIngredients.isEmpty()) {
-        groceryListService.addIngredients(userId, allIngredients);
+      // Add ingredients to the user's active grocery list with aggregated quantities
+      if (!ingredientMap.isEmpty()) {
+        groceryListService.addIngredientsWithQuantities(userId, new ArrayList<>(ingredientMap.values()));
       }
 
       return mealPlanRepository.save(mealPlan);
@@ -324,7 +346,7 @@ public class GeminiAiService {
     prompt.append("  \"servings\": ").append(request.getServings()).append(",\n");
     prompt.append("  \"instructions\": \"Step-by-step cooking instructions\",\n");
     prompt.append(
-        "  \"imageUrl\": \"https://images.unsplash.com/photo-1234567890\", // Provide a high-quality Unsplash image URL suitable for the recipe\n");
+        "  \"imageUrl\": \"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1080\", // Provide a REAL, valid high-quality Unsplash image URL suitable for the recipe. Do NOT hallucinate IDs; use well-known food photo IDs from Unsplash.\n");
     prompt.append("  \"ingredients\": [\n");
     prompt.append("    {\n");
     prompt.append("      \"name\": \"ingredient name\",\n");
@@ -375,7 +397,8 @@ public class GeminiAiService {
     prompt.append("      \"cookTime\": 20,\n");
     prompt.append("      \"servings\": 2,\n");
     prompt.append("      \"instructions\": \"Step 1... Step 2...\",\n");
-    prompt.append("      \"imageUrl\": \"https://images.unsplash.com/photo-1234567890\",\n");
+    prompt.append(
+        "      \"imageUrl\": \"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1080\", // Provide a REAL Unsplash URL\n");
     prompt.append("      \"ingredients\": [\n");
     prompt.append("        {\"name\": \"Ing 1\", \"quantity\": 100, \"unit\": \"g\"}\n");
     prompt.append("      ]\n");

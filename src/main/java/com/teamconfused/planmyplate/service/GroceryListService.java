@@ -32,6 +32,20 @@ public class GroceryListService {
         groceryList.setUser(user);
         groceryList.setDateCreated(LocalDate.now());
         groceryList.setStatus("active");
+
+        // Ensure default values for items if provided during creation
+        if (groceryList.getItems() != null) {
+            for (com.teamconfused.planmyplate.entity.GroceryListItem item : groceryList.getItems()) {
+                if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                    item.setQuantity(1);
+                }
+                if (item.getUnit() == null || item.getUnit().trim().isEmpty()) {
+                    item.setUnit("unit");
+                }
+                item.setGroceryList(groceryList);
+            }
+        }
+
         return repository.save(groceryList);
     }
 
@@ -58,6 +72,14 @@ public class GroceryListService {
 
     public List<GroceryList> getByStatus(Integer userId, String status) {
         return repository.findByUser_UserIdAndStatus(userId, status);
+    }
+
+    public void deactivateActiveLists(Integer userId) {
+        List<GroceryList> activeLists = repository.findByUser_UserIdAndStatus(userId, "active");
+        for (GroceryList list : activeLists) {
+            list.setStatus("completed");
+            repository.save(list);
+        }
     }
 
     public void addIngredients(Integer userId,
@@ -134,16 +156,19 @@ public class GroceryListService {
                     .findFirst()
                     .orElse(null);
 
+            int quantityToAdd = (data.getQuantity() != null && data.getQuantity() > 0) ? data.getQuantity() : 1;
+            String unitToAdd = (data.getUnit() != null && !data.getUnit().trim().isEmpty()) ? data.getUnit() : "unit";
+
             if (existingItem != null) {
                 // Aggregate quantity
-                existingItem.setQuantity(existingItem.getQuantity() + data.getQuantity());
+                existingItem.setQuantity(existingItem.getQuantity() + quantityToAdd);
             } else {
                 // Add new item
                 com.teamconfused.planmyplate.entity.GroceryListItem newItem = new com.teamconfused.planmyplate.entity.GroceryListItem();
                 newItem.setGroceryList(activeList);
                 newItem.setIngredient(data.getIngredient());
-                newItem.setQuantity(data.getQuantity());
-                newItem.setUnit(data.getUnit());
+                newItem.setQuantity(quantityToAdd);
+                newItem.setUnit(unitToAdd);
                 activeList.getItems().add(newItem);
             }
         }

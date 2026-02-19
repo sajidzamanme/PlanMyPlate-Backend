@@ -27,6 +27,11 @@ public class MealPlanService {
 
     public MealPlan create(Integer userId, MealPlan mealPlan) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Deactivate existing meal plans and grocery lists
+        deactivateActiveMealPlans(userId);
+        groceryListService.deactivateActiveLists(userId);
+
         mealPlan.setUser(user);
         if (mealPlan.getStartDate() == null) {
             mealPlan.setStartDate(LocalDate.now());
@@ -60,6 +65,14 @@ public class MealPlanService {
         return repository.findByUser_UserIdAndStatus(userId, status);
     }
 
+    public void deactivateActiveMealPlans(Integer userId) {
+        List<MealPlan> activePlans = repository.findByUser_UserIdAndStatus(userId, "active");
+        for (MealPlan plan : activePlans) {
+            plan.setStatus("inactive");
+            repository.save(plan);
+        }
+    }
+
     public List<MealPlan> getWeeklyMealPlans(Integer userId) {
         return repository.findByUser_UserIdAndDuration(userId, 7);
     }
@@ -70,6 +83,10 @@ public class MealPlanService {
     @org.springframework.transaction.annotation.Transactional
     public MealPlan createWithRecipes(Integer userId, com.teamconfused.planmyplate.dto.MealPlanRequestDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Deactivate existing meal plans and grocery lists
+        deactivateActiveMealPlans(userId);
+        groceryListService.deactivateActiveLists(userId);
 
         MealPlan mealPlan = new MealPlan();
         mealPlan.setUser(user);
@@ -133,8 +150,8 @@ public class MealPlanService {
 
                     for (com.teamconfused.planmyplate.entity.RecipeIngredient ri : recipe.getRecipeIngredients()) {
                         Integer riQuantity = ri.getQuantity();
-                        if (riQuantity == null) {
-                            riQuantity = 0; // Or 1, depending on business logic, but 0 is safer for aggregation
+                        if (riQuantity == null || riQuantity <= 0) {
+                            riQuantity = 1; // Default to 1 if not specified or 0
                         }
 
                         String key = ri.getIngredient().getIngId() + "_" +
