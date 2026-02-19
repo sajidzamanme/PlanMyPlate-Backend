@@ -31,9 +31,8 @@ public class AiRecipeController {
       @RequestParam Integer userId,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
 
-    if (startDate == null) {
-      startDate = LocalDate.now();
-    }
+    // Always set startDate to today's date
+    startDate = LocalDate.now();
 
     MealPlan mealPlan = geminiAiService.generateWeeklyMealPlan(userId, startDate);
     return ResponseEntity.status(HttpStatus.CREATED).body(mealPlan);

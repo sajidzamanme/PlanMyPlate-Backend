@@ -33,9 +33,7 @@ public class MealPlanService {
         groceryListService.deactivateActiveLists(userId);
 
         mealPlan.setUser(user);
-        if (mealPlan.getStartDate() == null) {
-            mealPlan.setStartDate(LocalDate.now());
-        }
+        mealPlan.setStartDate(LocalDate.now()); // Always use today's date
         if (mealPlan.getStatus() == null) {
             mealPlan.setStatus("active");
         }
@@ -74,7 +72,9 @@ public class MealPlanService {
     }
 
     public List<MealPlan> getWeeklyMealPlans(Integer userId) {
-        return repository.findByUser_UserIdAndDuration(userId, 7);
+        return repository.findByUser_UserIdAndDuration(userId, 7).stream()
+                .filter(plan -> "active".equalsIgnoreCase(plan.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private final com.teamconfused.planmyplate.repository.RecipeRepository recipeRepository;
@@ -90,7 +90,7 @@ public class MealPlanService {
 
         MealPlan mealPlan = new MealPlan();
         mealPlan.setUser(user);
-        mealPlan.setStartDate(dto.getStartDate() != null ? dto.getStartDate() : LocalDate.now());
+        mealPlan.setStartDate(LocalDate.now()); // Always use today's date
         mealPlan.setDuration(dto.getDuration() != null ? dto.getDuration() : 7); // Default 7 days
         mealPlan.setStatus("active");
 
